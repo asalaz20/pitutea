@@ -1,0 +1,60 @@
+{% for oferta in ofertas %}
+<div class="col-12 col-md-6 col-lg-4">
+    <!-- Si es recomendado, le damos un borde primario suave -->
+    <div class="card h-100 shadow-sm rounded-4 {% if oferta.es_recomendado %}border-primary border-2{% else %}border-0{% endif %}">
+        <div class="card-body d-flex flex-column">
+            
+            {% if oferta.es_recomendado %}
+            <div class="mb-2">
+                <span class="badge text-bg-warning text-dark rounded-pill fw-bold">⭐ Recomendado para ti</span>
+            </div>
+            {% endif %}
+
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <h5 class="card-title fw-bold mb-0 text-dark">{{ oferta.titulo }}</h5>
+                <span class="badge rounded-pill text-bg-info text-white">{{ oferta.flexibilidad }}</span>
+            </div>
+            
+            <p class="card-text text-secondary small flex-grow-1 mb-2">{{ oferta.descripcion }}</p>
+            
+            <div class="mb-3 small text-muted">
+                <strong>📍 Comuna:</strong> {{ oferta.comuna|default:"Remoto / No especificado" }}<br>
+                <strong>📁 Categoría:</strong> {{ oferta.get_categoria_display }}
+            </div>
+            
+            <div class="mt-auto mb-3">
+                <span class="fs-5 fw-bold text-success">{{ oferta.pago }}</span>
+                <span class="text-muted small">/ {{ oferta.tipo_pago }}</span>
+            </div>
+            
+            {% if user.is_authenticated %}
+                {% if user.perfil.rol == 'CUIDADOR' %}
+                    <button 
+                        class="btn btn-primary w-100 fw-bold py-2 rounded-3 shadow-sm"
+                        hx-post="{% url 'postular_pituto' oferta.id %}"
+                        hx-swap="outerHTML"
+                        hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+                        Postular Ahora
+                    </button>
+                {% else %}
+                    <button class="btn btn-outline-secondary w-100 fw-bold py-2 rounded-3 disabled" disabled>
+                        Solo Cuidadores
+                    </button>
+                {% endif %}
+            {% else %}
+                <a href="{% url 'login' %}" class="btn btn-primary w-100 fw-bold py-2 rounded-3 shadow-sm">
+                    Inicia Sesión para Postular
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% empty %}
+<div class="col-12">
+    <div class="alert alert-light text-center border rounded-4 py-4 shadow-sm" role="alert">
+        <span class="fs-1 d-block mb-2">🕵️‍♀️</span>
+        <span class="fw-bold">Sin resultados</span>
+        <p class="mb-0 small text-muted">No encontramos pitutos que coincidan con tu búsqueda.</p>
+    </div>
+</div>
+{% endfor %}

@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Pitutos Disponibles | Pitutea{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col-12">
+        <h1 class="h4 fw-bold text-dark mb-1">Encontrar Pitutos</h1>
+        <p class="text-muted small">Filtra ofertas adaptadas a tu perfil.</p>
+        
+        <!-- Buscador HTMX -->
+        <form class="bg-white p-3 rounded-4 shadow-sm mb-4" 
+              hx-get="{% url 'listar_ofertas' %}" 
+              hx-target="#grilla-ofertas" 
+              hx-trigger="input from:input, change from:select">
+            
+            <div class="row g-2 mb-2">
+                <div class="col-12">
+                    <input type="search" name="q" class="form-control rounded-3 bg-light border-0" placeholder="Buscar por palabra clave...">
+                </div>
+            </div>
+            
+            <div class="row g-2">
+                <div class="col-12 col-md-4">
+                    <select name="categoria" class="form-select rounded-3 bg-light border-0">
+                        <option value="">Todas las Categorías</option>
+                        <option value="admin">Administrativo / Oficina</option>
+                        <option value="hogar">Hogar / Limpieza</option>
+                        <option value="cuidado">Cuidado de Personas</option>
+                        <option value="digital">Digital / Redes Sociales</option>
+                        <option value="logistica">Logística / Reparto</option>
+                        <option value="otro">Otro</option>
+                    </select>
+                </div>
+                <div class="col-6 col-md-4">
+                    <input type="text" name="comuna" class="form-control rounded-3 bg-light border-0" placeholder="Filtrar por comuna">
+                </div>
+                <div class="col-6 col-md-4">
+                    <select name="tipo" class="form-select rounded-3 bg-light border-0">
+                        <option value="">Cualquier pago</option>
+                        <option value="tarea">Por Tarea</option>
+                        <option value="hora">Por Hora</option>
+                        <option value="dia">Por Día</option>
+                        <option value="semana">Por Semana</option>
+                        <option value="mes">Por Mes</option>
+                    </select>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="grilla-ofertas" class="row g-3">
+    {% include 'parcial_grilla_ofertas.html' %}
+</div>
+{% endblock %}

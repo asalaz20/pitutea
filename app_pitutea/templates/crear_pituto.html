@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Publicar Pituto | Pitutea{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="bg-white p-4 rounded-4 shadow-sm border-0 mb-4 mt-2">
+            <h2 class="fw-bold mb-1">Publicar Nuevo Pituto</h2>
+            <p class="text-muted mb-4 small">Completa los datos para encontrar al candidato ideal.</p>
+            
+            <form method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small text-dark">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}<div class="text-danger small mt-1">{{ field.errors.0 }}</div>{% endif %}
+                </div>
+                {% endfor %}
+                <div class="d-flex gap-2 mt-2">
+                    <button type="submit" class="btn btn-primary w-50 fw-bold py-3 rounded-3 mt-2 shadow-sm">
+                        Publicar Oferta
+                    </button>
+                    <a class="btn btn-outline-primary w-50 fw-bold py-3 rounded-3 mt-2 shadow-sm" href="{% if user.is_authenticated and user.perfil.rol == 'OFERENTE' %}{% url 'panel_oferente' %}{% else %}{% url 'listar_ofertas' %}{% endif %}"><i class="fa-solid fa-house"></i> Regresar</a>
+                </div><!-- Close d-flex --> 
+                <br>
+                <br>   
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

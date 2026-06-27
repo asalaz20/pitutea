@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}Postulantes | Pitutea{% endblock %}
+{% block content %}
+<div class="mb-4 mt-2">
+    <a href="{% url 'panel_oferente' %}" class="text-decoration-none text-muted small">← Volver al panel</a>
+    <h1 class="h4 fw-bold text-dark mt-2 mb-1">Postulantes para:</h1>
+    <h2 class="h5 text-primary">{{ pituto.titulo }}</h2>
+</div>
+
+<div class="row g-3">
+    {% for post in postulaciones %}
+    <div class="col-12">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="fw-bold mb-1">{{ post.usuario.username }}</h5>
+                        <p class="text-muted small mb-1">
+                            📞 {{ post.usuario.perfil.telefono|default:"No registró teléfono" }}<br>
+                            📍 {{ post.usuario.perfil.comuna|default:"Comuna no especificada" }}<br>
+                            ✉️ {{ post.usuario.email }}
+                        </p>
+                        <p class="small mb-0 mt-2"><strong>Habilidades:</strong><br> {{ post.usuario.perfil.habilidades|default:"No especificadas" }}</p>
+                    </div>
+                    <div class="text-end text-muted small align-self-start">
+                        {{ post.fecha_postulacion|date:"d M H:i" }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-light text-center border rounded-4 py-4 shadow-sm" role="alert">
+            Todavía no hay postulantes para este pituto.
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

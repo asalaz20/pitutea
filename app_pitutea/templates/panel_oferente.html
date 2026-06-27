@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Panel de Oferente | Pitutea{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+    <div>
+        <h1 class="h4 fw-bold text-dark mb-1">Tus Pitutos Publicados</h1>
+        <p class="text-muted small mb-0">Gestiona tus ofertas de trabajo.</p>
+    </div>
+    <a href="{% url 'crear_pituto' %}" class="btn btn-primary fw-bold rounded-pill px-4 shadow-sm">+ Nuevo</a>
+</div>
+
+<div class="row g-3">
+    {% for pituto in pitutos %}
+    <div class="col-12 col-md-6">
+        <div class="card h-100 border-0 shadow-sm rounded-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="card-title fw-bold mb-0 text-dark">{{ pituto.titulo }}</h5>
+                    <span class="badge {% if pituto.activo %}text-bg-success{% else %}text-bg-secondary{% endif %} rounded-pill">
+                        {% if pituto.activo %}Activo{% else %}Inactivo{% endif %}
+                    </span>
+                </div>
+                <p class="text-muted small mb-3">Publicado el {{ pituto.fecha_creacion|date:"d M Y" }}</p>
+                <a href="{% url 'ver_postulantes' pituto.id %}" class="btn btn-outline-primary w-100 rounded-3 fw-bold">
+                    Ver Postulantes ({{ pituto.postulaciones.count }})
+                </a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-light text-center border rounded-4 py-4 shadow-sm" role="alert">
+            No tienes pitutos publicados aún. ¡Publica tu primer pituto!
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

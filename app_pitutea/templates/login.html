@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Iniciar Sesión | Pitutea{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-5">
+        <div class="bg-white p-4 rounded-4 shadow-sm border-0 mt-4">
+            <h2 class="fw-bold mb-1">Bienvenido</h2>
+            <p class="text-muted mb-4 small">Ingresa para encontrar o publicar un pituto.</p>
+            
+            <form method="post">
+                {% csrf_token %}
+                
+                {% if form.errors %}
+                <div class="alert alert-danger p-2 small rounded-3">
+                    Usuario o contraseña incorrectos.
+                </div>
+                {% endif %}
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small text-dark">Nombre de Usuario</label>
+                    <input type="text" name="username" class="form-control rounded-3" placeholder="Ej: juan_perez" required>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="form-label fw-semibold small text-dark">Contraseña</label>
+                    <input type="password" name="password" class="form-control rounded-3" placeholder="••••••••" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary w-100 fw-bold py-3 rounded-3 shadow-sm">
+                    Ingresar
+                </button>
+            </form>
+            
+            <div class="text-center mt-4">
+                <span class="text-muted small">¿No tienes cuenta?</span>
+                <a href="{% url 'registro' %}" class="fw-bold text-primary text-decoration-none small">Regístrate aquí</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

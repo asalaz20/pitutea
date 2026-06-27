@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Registro | Pitutea{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-5">
+        <div class="bg-white p-4 rounded-4 shadow-sm border-0 mt-2">
+            <h2 class="fw-bold mb-1">Únete a Pitutea</h2>
+            <p class="text-muted mb-4 small">Trabajos flexibles a tu alcance.</p>
+            
+            <form method="post">
+                {% csrf_token %}
+                
+                {% if form.errors %}
+                <div class="alert alert-danger p-2 small rounded-3">
+                    Revisa los errores del formulario abajo.
+                </div>
+                {% endif %}
+
+                {% for field in form %}
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small text-dark">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="text-danger small mt-1">{{ field.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                
+                <button type="submit" class="btn btn-primary w-100 fw-bold py-3 rounded-3 mt-2 shadow-sm">
+                    Crear mi cuenta
+                </button>
+            </form>
+            
+            <div class="text-center mt-4">
+                <span class="text-muted small">¿Ya tienes cuenta?</span>
+                <a href="{% url 'login' %}" class="fw-bold text-primary text-decoration-none small">Ingresa aquí</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
