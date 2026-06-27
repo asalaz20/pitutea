@@ -74,3 +74,6 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# En principio daba error ya que siempre dirigia por defecto de Djando a accounts/profile
+LOGIN_REDIRECT_URL = 'panel_oferente'

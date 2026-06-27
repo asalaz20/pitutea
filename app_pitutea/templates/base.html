@@ -66,15 +66,15 @@
                         <li class="nav-item">
                             <form action="{% url 'logout' %}" method="post">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-outline-light btn-sm mt-1"><i class="fa-solid fa-arrow-right-from-bracket"></i> Salir</button>
+                                <button type="submit" class="btn btn-outline-light btn-sm mt-1"><i class="fa-solid fa-arrow-left-from-bracket"></i>&nbsp; Salir</button>
                             </form>
                         </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="nav-link text-white" href="{% url 'login' %}">Ingresar</a>
+                            <a class="nav-link text-white" href="{% url 'login' %}"><i class="fa-solid fa-arrow-right-to-bracket"></i>&nbsp; Ingresar</a>
                         </li>
                         <li class="nav-item">
-                            <a class="btn btn-light text-primary btn-sm mt-1 ms-2 fw-bold" href="{% url 'registro' %}">Registrarse</a>
+                            <a class="btn btn-light text-primary btn-sm mt-1 ms-2 fw-bold" href="{% url 'registro' %}"><i class="fa-regular fa-address-card"></i>&nbsp; Registrarse</a>
                         </li>
                     {% endif %}
                 </ul>
