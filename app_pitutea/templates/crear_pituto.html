@@ -20,7 +20,7 @@
                     <button type="submit" class="btn btn-primary w-50 fw-bold py-3 rounded-3 mt-2 shadow-sm">
                         Publicar Oferta
                     </button>
-                    <a class="btn btn-outline-primary w-50 fw-bold py-3 rounded-3 mt-2 shadow-sm" href="{% if user.is_authenticated and user.perfil.rol == 'OFERENTE' %}{% url 'panel_oferente' %}{% else %}{% url 'listar_ofertas' %}{% endif %}"><i class="fa-solid fa-house"></i> Regresar</a>
+                    <a class="btn btn-outline-primary w-50 fw-bold py-3 rounded-3 mt-2 shadow-sm" href="{% if user.is_authenticated and user.perfil.rol == 'OFERENTE' %}{% url 'panel_oferente' %}{% else %}{% url 'listar_ofertas' %}{% endif %}"><i class="fa-solid fa-arrow-rotate-left"></i> Regresar</a>
                 </div><!-- Close d-flex --> 
                 <br>
                 <br>   
