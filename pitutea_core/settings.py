@@ -75,5 +75,14 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# Media files (uploads)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+
 # En principio daba error ya que siempre dirigia por defecto de Djando a accounts/profile
 LOGIN_REDIRECT_URL = 'panel_oferente'
+
+# Email settings for local development (prints to console)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'no-reply@pitutea.cl'

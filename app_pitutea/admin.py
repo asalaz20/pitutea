@@ -3,7 +3,7 @@ from .models import Pituto, Postulacion, Perfil
 
 @admin.register(Perfil)
 class PerfilAdmin(admin.ModelAdmin):
-    list_display = ('usuario', 'rol', 'habilidades')
+    list_display = ('usuario', 'rol', 'rut', 'carnet_cuidador')
     list_filter = ('rol',)
 
 @admin.register(Pituto)

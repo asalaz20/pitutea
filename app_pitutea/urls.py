@@ -9,7 +9,9 @@ urlpatterns = [
     
     # Autenticación y Perfil
     path('registro/', views.registro_usuario, name='registro'),
-    path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
+    path('verificar-correo/<str:uidb64>/<str:token>/', views.verificar_correo, name='verificar_correo'),
+    path('login/', views.login_usuario, name='login'),
+    path('login/2fa/', views.login_2fa, name='login_2fa'),
     path('logout/', auth_views.LogoutView.as_view(next_page='listar_ofertas'), name='logout'),
     path('perfil/', views.editar_perfil, name='editar_perfil'),
     

@@ -20,6 +20,8 @@ class Perfil(models.Model):
     rol = models.CharField(max_length=20, choices=ROL_CHOICES)
     
     # Nuevos campos para Perfil Avanzado y Matching
+    rut = models.CharField(max_length=20, blank=True, null=True, verbose_name="RUT")
+    carnet_cuidador = models.FileField(upload_to='carnets/', blank=True, null=True, verbose_name="Carnet de Cuidador")
     comuna = models.CharField(max_length=100, blank=True, null=True, verbose_name="Comuna de residencia")
     categoria_interes = models.CharField(max_length=20, choices=CATEGORIAS_CHOICES, blank=True, null=True, verbose_name="Categoría de mayor interés")
     habilidades = models.TextField(blank=True, null=True, verbose_name="Habilidades o experiencia")

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Error de Verificación | Pitutea{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="bg-white p-5 rounded-4 shadow-sm border-0 text-center mt-4">
+            <div class="text-danger mb-4">
+                <i class="fa-solid fa-circle-exclamation fa-5x"></i>
+            </div>
+            
+            <h2 class="fw-bold mb-2 text-danger">Enlace Inválido o Expirado ❌</h2>
+            <p class="text-muted mb-4">
+                El enlace de activación que has utilizado no es válido, ya ha sido utilizado o ha expirado.
+            </p>
+            
+            <hr class="my-4 text-muted">
+            
+            <div class="d-grid gap-2">
+                <a href="{% url 'registro' %}" class="btn btn-outline-primary fw-bold py-3 rounded-3 shadow-sm">
+                    Volver a Registrarse
+                </a>
+                <a href="{% url 'login' %}" class="btn btn-primary fw-bold py-3 rounded-3 shadow-sm mt-2">
+                    Ir al Inicio de Sesión
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
