@@ -5,7 +5,7 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-12 col-md-8 col-lg-6">
-        <div class="bg-white p-5 rounded-4 shadow-sm border-0 text-center mt-4">
+        <div class="bg-white p-5 rounded-4 shadow-sm border-0 text-center mt-4 mb-4">
             <div class="text-primary mb-4">
                 <i class="fa-regular fa-envelope-open fa-5x"></i>
             </div>
@@ -18,12 +18,18 @@
             </div>
             
             <p class="text-muted mb-4">
-                Por favor, haz clic en el enlace del correo electrónico para activar tu cuenta. 
-                <br>
-                <span class="badge bg-warning text-dark px-3 py-2 mt-2">
-                    <i class="fa-solid fa-code"></i> Modo desarrollo: Revisa la consola del servidor para ver el email enviado.
-                </span>
+                Por favor, haz clic en el enlace del correo electrónico para activar tu cuenta.
             </p>
+
+            {% if debug_activation_link %}
+            <div class="alert alert-warning text-start rounded-3 mb-4">
+                <p class="fw-bold mb-2"><i class="fa-solid fa-bug"></i> Modo Desarrollo — Enlace de Activación:</p>
+                <p class="text-muted small mb-2">Como el servidor de correo está en modo consola, usa este enlace directamente para activar tu cuenta:</p>
+                <a href="{{ debug_activation_link }}" class="btn btn-warning fw-bold w-100 py-2 rounded-3 text-break text-start" style="word-break: break-all; font-size: 0.75rem;">
+                    <i class="fa-solid fa-link"></i> {{ debug_activation_link }}
+                </a>
+            </div>
+            {% endif %}
             
             <hr class="my-4 text-muted">
             
@@ -36,3 +42,4 @@
     </div>
 </div>
 {% endblock %}
+

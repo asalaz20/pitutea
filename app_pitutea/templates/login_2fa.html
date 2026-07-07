@@ -26,12 +26,16 @@
                 <div class="mb-4">
                     <label class="form-label fw-semibold small text-dark d-block text-center mb-3">Código de 6 dígitos</label>
                     <input type="text" name="otp" class="form-control text-center fw-bold fs-3 letter-spacing-lg rounded-3 py-2" placeholder="000000" maxlength="6" required autocomplete="one-time-code" autofocus>
-                    <div class="form-text text-muted text-center mt-2 small">El código vence en 5 minutos.</div>
+                <div class="form-text text-muted text-center mt-2 small">El código vence en 5 minutos.</div>
                 </div>
-                
-                <div class="badge bg-warning text-dark d-block p-2 mb-4 text-center text-wrap fw-normal rounded-3">
-                    <i class="fa-solid fa-code"></i> Modo desarrollo: El correo impreso en la consola contiene el código OTP.
+
+                {% if debug_otp %}
+                <div class="alert alert-warning rounded-3 mb-4 text-center">
+                    <p class="fw-bold mb-1"><i class="fa-solid fa-bug"></i> Modo Desarrollo — Código OTP:</p>
+                    <div class="display-6 fw-bold text-warning letter-spacing-lg">{{ debug_otp }}</div>
+                    <p class="text-muted small mb-0 mt-1">Copia este código en el campo de arriba.</p>
                 </div>
+                {% endif %}
                 
                 <button type="submit" class="btn btn-primary w-100 fw-bold py-3 rounded-3 shadow-sm">
                     <i class="fa-solid fa-arrow-right-to-bracket"></i>&nbsp; Verificar y Entrar

@@ -2,6 +2,11 @@ from django import forms
 from django.contrib.auth.models import User
 from .models import Perfil, Pituto
 
+def normalizar_rut(rut_str):
+    if not rut_str:
+        return ""
+    return rut_str.replace(".", "").replace("-", "").strip().upper()
+
 class RegistroForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control rounded-3', 'placeholder': '••••••••'}), label='Contraseña')
     password_confirm = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control rounded-3', 'placeholder': '••••••••'}), label='Confirmar Contraseña')
@@ -53,6 +58,11 @@ class RegistroForm(forms.ModelForm):
             elif rut:
                 if not self.validar_rut(rut):
                     self.add_error("rut", "El RUT ingresado no es válido.")
+                else:
+                    # Validar RUT único para cuidadores
+                    rut_norm = normalizar_rut(rut)
+                    if Perfil.objects.filter(rut=rut_norm, rol='CUIDADOR').exists():
+                        self.add_error("rut", "Este RUT ya está registrado por otro cuidador.")
             if not telefono:
                 self.add_error("telefono", "El teléfono celular es requerido para cuidadores.")
             if not habilidades:
@@ -63,7 +73,7 @@ class RegistroForm(forms.ModelForm):
         return cleaned_data
 
     def validar_rut(self, rut_str):
-        rut_str = rut_str.replace(".", "").replace("-", "").strip().upper()
+        rut_str = normalizar_rut(rut_str)
         if not rut_str or len(rut_str) < 2:
             return False
         cuerpo = rut_str[:-1]
@@ -75,7 +85,7 @@ class RegistroForm(forms.ModelForm):
         multiplo = 2
         for c in reversed(cuerpo):
             suma += int(c) * multiplo
-            multiplo = 9 if multiplo == 7 else multiplo + 1
+            multiplo = 2 if multiplo == 7 else multiplo + 1
         
         dvr = 11 - (suma % 11)
         if dvr == 11:
@@ -90,8 +100,6 @@ class RegistroForm(forms.ModelForm):
     def save(self, commit=True):
         user = super().save(commit=False)
         user.set_password(self.cleaned_data["password"])
-        
-        # Marcar usuario como inactivo hasta que verifique su correo
         user.is_active = False
         
         rol = self.cleaned_data['rol']
@@ -106,7 +114,7 @@ class RegistroForm(forms.ModelForm):
                 rol=rol
             )
             if rol == 'CUIDADOR':
-                perfil.rut = self.cleaned_data.get('rut')
+                perfil.rut = normalizar_rut(self.cleaned_data.get('rut'))
                 perfil.telefono = self.cleaned_data.get('telefono')
                 perfil.habilidades = self.cleaned_data.get('habilidades')
                 perfil.carnet_cuidador = self.cleaned_data.get('carnet_cuidador')
@@ -130,19 +138,17 @@ class PerfilForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Si el usuario es OFERENTE, no le mostramos campos de cuidador
         if self.instance and self.instance.rol == 'OFERENTE':
             self.fields.pop('nombres', None)
             self.fields.pop('apellidos', None)
             self.fields.pop('rut', None)
             self.fields.pop('carnet_cuidador', None)
         else:
-            # Poblamos nombres y apellidos desde el usuario relacionado
             if self.instance and self.instance.usuario:
                 self.initial['nombres'] = self.instance.usuario.first_name
                 self.initial['apellidos'] = self.instance.usuario.last_name
+                self.initial['rut'] = self.instance.rut_formateado
                 
-            # Hacemos obligatorios nombres, apellidos y rut si es cuidador
             if 'nombres' in self.fields:
                 self.fields['nombres'].required = True
             if 'apellidos' in self.fields:
@@ -152,16 +158,21 @@ class PerfilForm(forms.ModelForm):
 
     def clean_rut(self):
         rut = self.cleaned_data.get('rut')
-        # Validar solo si es cuidador y el campo está presente
         if self.instance and self.instance.rol == 'CUIDADOR':
             if not rut:
                 raise forms.ValidationError("El RUT es requerido para cuidadores.")
             if not self.validar_rut_check(rut):
                 raise forms.ValidationError("El RUT ingresado no es válido.")
+            
+            # Validar RUT único para cuidadores
+            rut_norm = normalizar_rut(rut)
+            if Perfil.objects.filter(rut=rut_norm, rol='CUIDADOR').exclude(pk=self.instance.pk).exists():
+                raise forms.ValidationError("Este RUT ya está registrado por otro cuidador.")
+            return rut_norm
         return rut
 
     def validar_rut_check(self, rut_str):
-        rut_str = rut_str.replace(".", "").replace("-", "").strip().upper()
+        rut_str = normalizar_rut(rut_str)
         if not rut_str or len(rut_str) < 2:
             return False
         cuerpo = rut_str[:-1]
@@ -172,7 +183,7 @@ class PerfilForm(forms.ModelForm):
         multiplo = 2
         for c in reversed(cuerpo):
             suma += int(c) * multiplo
-            multiplo = 9 if multiplo == 7 else multiplo + 1
+            multiplo = 2 if multiplo == 7 else multiplo + 1
         dvr = 11 - (suma % 11)
         if dvr == 11:
             dvr_str = '0'

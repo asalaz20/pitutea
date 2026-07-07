@@ -8,18 +8,18 @@
         <div class="bg-white p-4 rounded-4 shadow-sm border-0 mt-2 mb-4">
             <h2 class="fw-bold mb-1">Únete a Pitutea 🤗</h2>
             <p class="text-muted mb-4 small">Completa los datos para crear tu cuenta.</p>
-            
+
             <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
-                
+
                 {% if form.errors %}
                 <div class="alert alert-danger p-3 small rounded-3">
                     <ul class="mb-0 ps-3">
-                    {% for field, errors in form.errors.items %}
+                        {% for field, errors in form.errors.items %}
                         {% for error in errors %}
-                            <li>{{ error }}</li>
+                        <li>{{ error }}</li>
                         {% endfor %}
-                    {% endfor %}
+                        {% endfor %}
                     </ul>
                 </div>
                 {% endif %}
@@ -29,9 +29,12 @@
                     <label class="form-label fw-semibold small text-dark">¿Qué vienes a hacer?</label>
                     <div class="row g-3">
                         <div class="col-6">
-                            <div id="btn-rol-cuidador" class="card border h-100 cursor-pointer text-center p-3 rounded-4 role-card" onclick="selectRole('CUIDADOR')">
+                            <div id="btn-rol-cuidador"
+                                class="card border h-100 cursor-pointer text-center p-3 rounded-4 role-card"
+                                onclick="selectRole('CUIDADOR')">
                                 <div class="card-body p-2">
-                                    <div class="icon-circle bg-primary-subtle text-primary mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 55px; height: 55px; border-radius: 50%; transition: all 0.3s;">
+                                    <div class="icon-circle bg-primary-subtle text-primary mx-auto mb-3 d-flex align-items-center justify-content-center"
+                                        style="width: 55px; height: 55px; border-radius: 50%; transition: all 0.3s;">
                                         <i class="fa-solid fa-hand-holding-heart fa-xl"></i>
                                     </div>
                                     <h6 class="fw-bold mb-1 text-dark">Buscar Trabajo</h6>
@@ -40,9 +43,12 @@
                             </div>
                         </div>
                         <div class="col-6">
-                            <div id="btn-rol-oferente" class="card border h-100 cursor-pointer text-center p-3 rounded-4 role-card" onclick="selectRole('OFERENTE')">
+                            <div id="btn-rol-oferente"
+                                class="card border h-100 cursor-pointer text-center p-3 rounded-4 role-card"
+                                onclick="selectRole('OFERENTE')">
                                 <div class="card-body p-2">
-                                    <div class="icon-circle bg-secondary-subtle text-secondary mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 55px; height: 55px; border-radius: 50%; transition: all 0.3s;">
+                                    <div class="icon-circle bg-secondary-subtle text-secondary mx-auto mb-3 d-flex align-items-center justify-content-center"
+                                        style="width: 55px; height: 55px; border-radius: 50%; transition: all 0.3s;">
                                         <i class="fa-solid fa-briefcase fa-xl"></i>
                                     </div>
                                     <h6 class="fw-bold mb-1 text-dark">Ofrecer Trabajo</h6>
@@ -63,7 +69,7 @@
                     <label class="form-label fw-semibold small text-dark">Nombre de Usuario</label>
                     {{ form.username }}
                     {% if form.username.errors %}
-                        <div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>
+                    <div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>
                     {% endif %}
                 </div>
 
@@ -71,7 +77,7 @@
                     <label class="form-label fw-semibold small text-dark">Correo Electrónico</label>
                     {{ form.email }}
                     {% if form.email.errors %}
-                        <div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>
+                    <div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>
                     {% endif %}
                 </div>
 
@@ -79,7 +85,7 @@
                     <label class="form-label fw-semibold small text-dark">Contraseña</label>
                     {{ form.password }}
                     {% if form.password.errors %}
-                        <div class="text-danger small mt-1">{{ form.password.errors.0 }}</div>
+                    <div class="text-danger small mt-1">{{ form.password.errors.0 }}</div>
                     {% endif %}
                 </div>
 
@@ -87,28 +93,29 @@
                     <label class="form-label fw-semibold small text-dark">Confirmar Contraseña</label>
                     {{ form.password_confirm }}
                     {% if form.password_confirm.errors %}
-                        <div class="text-danger small mt-1">{{ form.password_confirm.errors.0 }}</div>
+                    <div class="text-danger small mt-1">{{ form.password_confirm.errors.0 }}</div>
                     {% endif %}
                 </div>
 
                 <!-- Caregiver Specific Fields -->
                 <div id="campos-cuidador">
                     <hr class="my-4 text-muted">
-                    <h5 class="fw-bold mb-3 text-primary"><i class="fa-solid fa-id-card"></i> Información de Cuidador</h5>
-                    
+                    <h5 class="fw-bold mb-3 text-primary"><i class="fa-solid fa-id-card"></i> Información de Cuidador
+                    </h5>
+
                     <div class="row g-2">
                         <div class="col-6 mb-3">
                             <label class="form-label fw-semibold small text-dark">Nombres</label>
                             {{ form.nombres }}
                             {% if form.nombres.errors %}
-                                <div class="text-danger small mt-1">{{ form.nombres.errors.0 }}</div>
+                            <div class="text-danger small mt-1">{{ form.nombres.errors.0 }}</div>
                             {% endif %}
                         </div>
                         <div class="col-6 mb-3">
                             <label class="form-label fw-semibold small text-dark">Apellidos</label>
                             {{ form.apellidos }}
                             {% if form.apellidos.errors %}
-                                <div class="text-danger small mt-1">{{ form.apellidos.errors.0 }}</div>
+                            <div class="text-danger small mt-1">{{ form.apellidos.errors.0 }}</div>
                             {% endif %}
                         </div>
                     </div>
@@ -117,15 +124,16 @@
                         <label class="form-label fw-semibold small text-dark">RUT (ej: 12.345.678-9)</label>
                         {{ form.rut }}
                         {% if form.rut.errors %}
-                            <div class="text-danger small mt-1">{{ form.rut.errors.0 }}</div>
+                        <div class="text-danger small mt-1">{{ form.rut.errors.0 }}</div>
                         {% endif %}
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-semibold small text-dark">Teléfono Celular (ej: +56 9 1234 5678)</label>
+                        <label class="form-label fw-semibold small text-dark">Teléfono Celular (ej: +56 9 1234
+                            5678)</label>
                         {{ form.telefono }}
                         {% if form.telefono.errors %}
-                            <div class="text-danger small mt-1">{{ form.telefono.errors.0 }}</div>
+                        <div class="text-danger small mt-1">{{ form.telefono.errors.0 }}</div>
                         {% endif %}
                     </div>
 
@@ -133,25 +141,31 @@
                         <label class="form-label fw-semibold small text-dark">Habilidades o Competencias</label>
                         {{ form.habilidades }}
                         {% if form.habilidades.errors %}
-                            <div class="text-danger small mt-1">{{ form.habilidades.errors.0 }}</div>
+                        <div class="text-danger small mt-1">{{ form.habilidades.errors.0 }}</div>
                         {% endif %}
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-semibold small text-dark">Carnet de Cuidador (Documento / Foto)</label>
+                        <label class="form-label fw-semibold small text-dark">Carnet de Cuidador (Documento /
+                            Foto)</label>
                         {{ form.carnet_cuidador }}
-                        <div class="form-text text-muted small">Por favor adjunta una foto o documento de tu credencial o certificado de cuidador.</div>
+                        <div class="form-text text-muted small">Por favor adjunta una foto o documento de tu credencial
+                            o certificado de cuidador.</div>
                         {% if form.carnet_cuidador.errors %}
-                            <div class="text-danger small mt-1">{{ form.carnet_cuidador.errors.0 }}</div>
+                        <div class="text-danger small mt-1">{{ form.carnet_cuidador.errors.0 }}</div>
                         {% endif %}
                     </div>
                 </div>
-
-                <button type="submit" class="btn btn-primary w-100 fw-bold py-3 rounded-3 mt-4 shadow-sm">
-                   <i class="fa-solid fa-user-plus"></i>&nbsp; Crear mi cuenta
-                </button>
+                <div class="d-flex justify-content-center">
+                    <button type="submit" class="btn btn-primary w-50 fw-bold py-3 rounded-3 mt-4 shadow-sm">
+                        <i class="fa-solid fa-user-plus"></i>&nbsp; Crear mi cuenta
+                    </button>&nbsp;
+                    <button type="reset" class="btn btn-secondary w-50 fw-bold py-3 rounded-3 mt-4 shadow-sm">
+                        <i class="fa-solid fa-trash"></i>&nbsp; Limpiar
+                    </button>
+                </div>
             </form>
-            
+
             <div class="text-center mt-4">
                 <span class="text-muted small">¿Ya tienes cuenta?</span>
                 <a href="{% url 'login' %}" class="fw-bold text-primary text-decoration-none small">Ingresa aquí</a>
@@ -161,99 +175,103 @@
 </div>
 
 <style>
-.role-card {
-    transition: all 0.25s ease-in-out;
-    cursor: pointer;
-    border-width: 2px !important;
-}
-.role-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-}
-.role-card.active {
-    border-color: #0d6efd !important;
-    background-color: #f8f9fa;
-    box-shadow: 0 4px 15px rgba(13, 110, 253, 0.15) !important;
-}
-#campos-cuidador {
-    max-height: 0;
-    opacity: 0;
-    overflow: hidden;
-    transition: max-height 0.4s ease-out, opacity 0.3s ease-out;
-}
-#campos-cuidador.show {
-    max-height: 1200px;
-    opacity: 1;
-}
+    .role-card {
+        transition: all 0.25s ease-in-out;
+        cursor: pointer;
+        border-width: 2px !important;
+    }
+
+    .role-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .role-card.active {
+        border-color: #0d6efd !important;
+        background-color: #f8f9fa;
+        box-shadow: 0 4px 15px rgba(13, 110, 253, 0.15) !important;
+    }
+
+    #campos-cuidador {
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+        transition: max-height 0.4s ease-out, opacity 0.3s ease-out;
+    }
+
+    #campos-cuidador.show {
+        max-height: 1200px;
+        opacity: 1;
+    }
 </style>
 
 <script>
-function selectRole(role) {
-    const selectEl = document.querySelector('select[name="rol"]');
-    if (selectEl) {
-        selectEl.value = role;
-    }
-    
-    const cardCuidador = document.getElementById('btn-rol-cuidador');
-    const cardOferente = document.getElementById('btn-rol-oferente');
-    const camposCuidador = document.getElementById('campos-cuidador');
-    
-    if (role === 'CUIDADOR') {
-        cardCuidador.classList.add('active');
-        cardCuidador.querySelector('.icon-circle').classList.remove('bg-primary-subtle', 'text-primary');
-        cardCuidador.querySelector('.icon-circle').classList.add('bg-primary', 'text-white');
-        
-        cardOferente.classList.remove('active');
-        cardOferente.querySelector('.icon-circle').classList.add('bg-secondary-subtle', 'text-secondary');
-        cardOferente.querySelector('.icon-circle').classList.remove('bg-primary', 'text-white');
-        
-        camposCuidador.classList.add('show');
-    } else {
-        cardOferente.classList.add('active');
-        cardOferente.querySelector('.icon-circle').classList.remove('bg-secondary-subtle', 'text-secondary');
-        cardOferente.querySelector('.icon-circle').classList.add('bg-primary', 'text-white');
-        
-        cardCuidador.classList.remove('active');
-        cardCuidador.querySelector('.icon-circle').classList.add('bg-primary-subtle', 'text-primary');
-        cardCuidador.querySelector('.icon-circle').classList.remove('bg-primary', 'text-white');
-        
-        camposCuidador.classList.remove('show');
-    }
-}
+    function selectRole(role) {
+        const selectEl = document.querySelector('select[name="rol"]');
+        if (selectEl) {
+            selectEl.value = role;
+        }
 
-document.addEventListener("DOMContentLoaded", function() {
-    const selectEl = document.querySelector('select[name="rol"]');
-    if (selectEl) {
-        if (!selectEl.value) {
-            selectRole('CUIDADOR');
+        const cardCuidador = document.getElementById('btn-rol-cuidador');
+        const cardOferente = document.getElementById('btn-rol-oferente');
+        const camposCuidador = document.getElementById('campos-cuidador');
+
+        if (role === 'CUIDADOR') {
+            cardCuidador.classList.add('active');
+            cardCuidador.querySelector('.icon-circle').classList.remove('bg-primary-subtle', 'text-primary');
+            cardCuidador.querySelector('.icon-circle').classList.add('bg-primary', 'text-white');
+
+            cardOferente.classList.remove('active');
+            cardOferente.querySelector('.icon-circle').classList.add('bg-secondary-subtle', 'text-secondary');
+            cardOferente.querySelector('.icon-circle').classList.remove('bg-primary', 'text-white');
+
+            camposCuidador.classList.add('show');
         } else {
-            selectRole(selectEl.value);
+            cardOferente.classList.add('active');
+            cardOferente.querySelector('.icon-circle').classList.remove('bg-secondary-subtle', 'text-secondary');
+            cardOferente.querySelector('.icon-circle').classList.add('bg-primary', 'text-white');
+
+            cardCuidador.classList.remove('active');
+            cardCuidador.querySelector('.icon-circle').classList.add('bg-primary-subtle', 'text-primary');
+            cardCuidador.querySelector('.icon-circle').classList.remove('bg-primary', 'text-white');
+
+            camposCuidador.classList.remove('show');
         }
     }
 
-    const rutInput = document.getElementById('id_rut');
-    if (rutInput) {
-        rutInput.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/[^0-9kK]/g, '').toUpperCase();
-            if (value.length > 9) {
-                value = value.slice(0, 9);
-            }
-            if (value.length > 1) {
-                let cuerpo = value.slice(0, -1);
-                let dv = value.slice(-1);
-                
-                let cuerpoFormateado = '';
-                while (cuerpo.length > 3) {
-                    cuerpoFormateado = '.' + cuerpo.slice(-3) + cuerpoFormateado;
-                    cuerpo = cuerpo.slice(0, -3);
-                }
-                cuerpoFormateado = cuerpo + cuerpoFormateado;
-                e.target.value = cuerpoFormateado + '-' + dv;
+    document.addEventListener("DOMContentLoaded", function () {
+        const selectEl = document.querySelector('select[name="rol"]');
+        if (selectEl) {
+            if (!selectEl.value) {
+                selectRole('CUIDADOR');
             } else {
-                e.target.value = value;
+                selectRole(selectEl.value);
             }
-        });
-    }
-});
+        }
+
+        const rutInput = document.getElementById('id_rut');
+        if (rutInput) {
+            rutInput.addEventListener('input', function (e) {
+                let value = e.target.value.replace(/[^0-9kK]/g, '').toUpperCase();
+                if (value.length > 9) {
+                    value = value.slice(0, 9);
+                }
+                if (value.length > 1) {
+                    let cuerpo = value.slice(0, -1);
+                    let dv = value.slice(-1);
+
+                    let cuerpoFormateado = '';
+                    while (cuerpo.length > 3) {
+                        cuerpoFormateado = '.' + cuerpo.slice(-3) + cuerpoFormateado;
+                        cuerpo = cuerpo.slice(0, -3);
+                    }
+                    cuerpoFormateado = cuerpo + cuerpoFormateado;
+                    e.target.value = cuerpoFormateado + '-' + dv;
+                } else {
+                    e.target.value = value;
+                }
+            });
+        }
+    });
 </script>
 {% endblock %}

@@ -12,6 +12,7 @@ from django.utils.encoding import force_bytes, force_str
 from django.core.mail import send_mail
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib import messages
+from django.conf import settings
 
 from .models import Pituto, Postulacion, Perfil
 from .forms import RegistroForm, PerfilForm, PitutoForm
@@ -45,7 +46,10 @@ def registro_usuario(request):
             )
             
             # Mostrar pantalla de verificación pendiente
-            return render(request, 'registro_pendiente.html', {'email': user.email})
+            return render(request, 'registro_pendiente.html', {
+                'email': user.email,
+                'debug_activation_link': verification_link if settings.DEBUG else None
+            })
     else:
         form = RegistroForm()
         
@@ -91,6 +95,8 @@ def login_usuario(request):
                 request.session['2fa_otp'] = otp
                 request.session['2fa_expiry'] = expiry
                 request.session['next_url'] = next_url
+                if settings.DEBUG:
+                    request.session['2fa_debug_otp'] = otp
                 
                 # Enviar OTP por correo
                 subject = "Código de doble autenticación (2FA) - Pitutea"
@@ -158,8 +164,9 @@ def login_2fa(request):
                 return redirect('login')
         else:
             error_message = "Código OTP incorrecto. Inténtalo nuevamente."
-            
-    return render(request, 'login_2fa.html', {'error_message': error_message})
+
+    debug_otp = request.session.get('2fa_debug_otp') if settings.DEBUG else None
+    return render(request, 'login_2fa.html', {'error_message': error_message, 'debug_otp': debug_otp})
 
 @login_required
 def editar_perfil(request):

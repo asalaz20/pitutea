@@ -27,6 +27,22 @@ class Perfil(models.Model):
     habilidades = models.TextField(blank=True, null=True, verbose_name="Habilidades o experiencia")
     telefono = models.CharField(max_length=20, blank=True, null=True, verbose_name="Teléfono de contacto")
 
+    @property
+    def rut_formateado(self):
+        if not self.rut:
+            return ""
+        cleaned = self.rut.replace(".", "").replace("-", "").strip().upper()
+        if len(cleaned) <= 1:
+            return cleaned
+        cuerpo = cleaned[:-1]
+        dv = cleaned[-1]
+        cuerpo_formateado = ""
+        while len(cuerpo) > 3:
+            cuerpo_formateado = "." + cuerpo[-3:] + cuerpo_formateado
+            cuerpo = cuerpo[:-3]
+        cuerpo_formateado = cuerpo + cuerpo_formateado
+        return f"{cuerpo_formateado}-{dv}"
+
     def __str__(self):
         return f"{self.usuario.username} - {self.get_rol_display()}"
 
