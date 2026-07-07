@@ -34,11 +34,9 @@ class Perfil(models.Model):
 
 class Pituto(models.Model):
     TIPO_PAGO_CHOICES = [
-        ('tarea', 'Por Tarea'),
-        ('hora', 'Por Hora'),
-        ('dia', 'Por Día'),
-        ('semana', 'Por Semana'),
-        ('mes', 'Por Mes'),
+
+        ('Transferencia', 'Transferencia'),
+        ('Efectivo', 'Efectivo'),
     ]
 
     creador = models.ForeignKey(User, on_delete=models.CASCADE, related_name='pitutos_creados', verbose_name="Oferente creador")

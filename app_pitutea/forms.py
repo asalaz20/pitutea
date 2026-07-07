@@ -60,6 +60,6 @@ class PitutoForm(forms.ModelForm):
             'categoria': forms.Select(attrs={'class': 'form-select rounded-3'}),
             'comuna': forms.TextInput(attrs={'class': 'form-control rounded-3', 'placeholder': 'Opcional. Ej: Santiago Centro'}),
             'pago': forms.TextInput(attrs={'class': 'form-control rounded-3', 'placeholder': 'Ej: $15.000'}),
-            'tipo_pago': forms.Select(attrs={'class': 'form-select rounded-3'}),
+            'tipo_pago': forms.Select(attrs={'class': 'form-select rounded-3','placeholder': 'Seleccione ...'}),
             'flexibilidad': forms.TextInput(attrs={'class': 'form-control rounded-3', 'placeholder': 'Ej: Noche / Fines de semana'}),
         }
