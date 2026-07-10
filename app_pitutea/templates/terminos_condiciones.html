@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}Términos y Condiciones | Pitutea{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-10 col-lg-8">
+        <div class="bg-white p-4 p-md-5 rounded-4 shadow-sm border-0 mb-5 mt-3">
+            <h1 class="fw-bold mb-4 text-primary">Términos y Condiciones, Política de Privacidad</h1>
+            
+            <p class="text-muted mb-4">Última actualización: {% now "d \d\e F \d\e Y" %}</p>
+            
+            <div class="text-dark lh-lg">
+                <!-- INSTRUCCIÓN PARA EL USUARIO 
+                <div class="alert alert-warning mb-4 rounded-3 shadow-sm border-0">
+                    <h5 class="fw-bold"><i class="fa-solid fa-triangle-exclamation"></i> Instrucción para el Administrador</h5>
+                    Este es un texto de relleno (placeholder). Debes reemplazar el contenido que se encuentra debajo con el cuerpo legal real de tus términos y condiciones y políticas de privacidad en el archivo <code>terminos_condiciones.html</code>.
+                </div>
+                -->
+                <h4 class="fw-bold mt-4">1. ¿Qué es PituTEA?</h4>
+                <p>Bienvenido a PituTEA. Al acceder y utilizar este sitio web, aceptas cumplir con los siguientes términos y condiciones. Si no estás de acuerdo con alguna parte de estos términos, no debes usar nuestra plataforma.</p>
+                <p>PituTEA es una <b>plataforma de conexión digital</b>. Solo conectamos a personas que tengan disponibilidad de realizar un "Pituto" con personas que estarían dispuestos a pagar por un servicio ocasional y/o doméstico.</p>
+
+
+                <h4 class="fw-bold mt-4">2. Uso de la Plataforma</h4>
+                <p>La plataforma está diseñada para conectar oferentes con cuidadores. El usuario se compromete a proporcionar información veraz, precisa y actualizada en su perfil y en cualquier publicación que realice.</p>
+                
+                <h4 class="fw-bold mt-4">3. Privacidad y Datos Personales</h4>
+                <p>Tratamos tus datos personales con el máximo cuidado y bajo las leyes aplicables de protección de datos. Al registrarte, aceptas que procesemos tu información de acuerdo a nuestra política de privacidad.</p>
+                
+                <h4 class="fw-bold mt-4">4. Exención de Responsabilidades</h4>
+                <p>PituTEA funciona como un intermediario tecnológico. No nos hacemos responsables de las relaciones laborales, pagos o incidentes que ocurran directamente entre los oferentes y cuidadores.</p>
+                <ul>
+                    <li>No contratamos ni supervisamos servicios</li>
+                    <li>No intermediamos pagos</li>
+                    <li>No garantizamos la calidad de los servicios ofrecidos</li>
+                    <li>Los usuarios son responsables de sus propias acciones, acuerdos que tomen fuera de la aplixación y decisiones</li>
+                </ul>
+                <p>Al usar PituTea liberas de toda responsabilidad a PituTea, <b>sus fundadores, creadores y administradores</b> por:  </p>
+                <ul>
+                    <li>Acoso, Violencia, daños a terceros o propiedad privada</li>
+                    <li>Estafas, Robos o Fraudes</li>
+                    <li>Accidentes, incumplimientos, Problemas de salud</li>
+                    <li>Reclamaciones legales derivadas de la relación entre oferentes y cuidadores</li>
+                    <li>Temas tributarios: cada usuario es responsable de declarar sus ingresos </li>
+                </ul>
+                <p>Nos reservamos el derecho de eliminar cuentas.</p>
+                <h4 class="fw-bold mt-4">5. Modificaciones</h4>
+                <p>Nos reservamos el derecho de modificar estos términos en cualquier momento. Los cambios entrarán en vigor inmediatamente después de su publicación en el sitio web.</p>
+                
+                <h4 class="fw-bold mt-4">Privacidad</h4>
+                <h4 class="fw-bold mt-4">1. Datos que recopilamos</h4>
+                <p>Recopilamos información que nos proporcionas directamente, como tu nombre, correo electrónico, número de teléfono y cualquier otra información que decidas compartir en tu perfil o publicaciones.</p>     
+                <p>Los datos que recopilamos son: Nombre, teléfono, email, comuna, foto, experiencia, chats de coordinación.</p>  
+                <p><b>NO pedimos* datos bancarios.</b></p>  
+                <p>Solo usamos tus datos para que el algoritmo pueda conectarse mejor, No vendemos datos. Solo se ve tu perfil por otros usuarios. Podemos entregar info por orden judicial.</p>      
+                
+                <h4 class="fw-bold mt-4">Tus derechos de privacidad</h4>
+                <p>Tienes derecho a acceder, corregir o eliminar tu información personal. Para ejercer estos derechos, contáctanos a través de nuestro correo electrónico de soporte.</p>
+            </div>
+            
+            <div class="mt-5 text-center">
+                <a href="javascript:history.back()" class="btn btn-outline-primary fw-bold px-4 rounded-pill shadow-sm"><i class="fa-solid fa-arrow-left"></i> Volver atrás</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

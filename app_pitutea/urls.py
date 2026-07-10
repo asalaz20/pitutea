@@ -22,4 +22,8 @@ urlpatterns = [
     path('panel/pituto/<int:pituto_id>/editar/', views.editar_pituto, name='editar_pituto'),
     path('panel/pituto/<int:pituto_id>/archivar/', views.archivar_pituto, name='archivar_pituto'),
     path('panel/pituto/<int:pituto_id>/postulantes/', views.ver_postulantes, name='ver_postulantes'),
+    
+    # Páginas Legales
+    path('terminos-y-condiciones/', views.terminos_condiciones, name='terminos_condiciones'),
 ]
+

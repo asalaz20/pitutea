@@ -19,6 +19,10 @@ from .forms import RegistroForm, PerfilForm, PitutoForm
 
 # FASE 2: MATCHING Y PERFIL
 
+# Páginas Legales y Estáticas
+def terminos_condiciones(request):
+    return render(request, 'terminos_condiciones.html')
+
 def registro_usuario(request):
     if request.user.is_authenticated:
         return redirect('listar_ofertas')
