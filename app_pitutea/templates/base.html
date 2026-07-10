@@ -59,6 +59,13 @@
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav ms-auto">
                     {% if user.is_authenticated %}
+                        {% if user.perfil.rol == 'CUIDADOR' %}
+                        <li class="nav-item">
+                            <a href="{% url 'bitacora_cuidador' %}" class="nav-link text-white me-3">
+                                <i class="fa-solid fa-briefcase"></i>&nbsp; Mis Pitutos
+                            </a>
+                        </li>
+                        {% endif %}
                         <li class="nav-item">
                             <a href="{% url 'editar_perfil' %}" class="nav-link text-white me-3">
                                 <i class="fa-solid fa-user-gear"></i>&nbsp; {{ user.username }}</a>
@@ -98,9 +105,18 @@
                 <span class="bottom-nav-icon"><i class="fa-solid fa-gear"></i></span>
                 <span>Mi Panel</span>
             </a>
+        {% elif user.is_authenticated and user.perfil.rol == 'CUIDADOR' %}
+            <a href="{% url 'listar_ofertas' %}" class="bottom-nav-item">
+                <span class="bottom-nav-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+                <span>Ofertas</span>
+            </a>
+            <a href="{% url 'bitacora_cuidador' %}" class="bottom-nav-item">
+                <span class="bottom-nav-icon"><i class="fa-solid fa-briefcase"></i></span>
+                <span>Mis Pitutos</span>
+            </a>
         {% else %}
             <a href="{% url 'listar_ofertas' %}" class="bottom-nav-item">
-                <span class="bottom-nav-icon"><i class="fa-duotone fa-solid fa-magnifying-glass"></i></span>
+                <span class="bottom-nav-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
                 <span>Ofertas</span>
             </a>
         {% endif %}

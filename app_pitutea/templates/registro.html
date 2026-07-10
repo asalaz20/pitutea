@@ -37,7 +37,7 @@
                                         style="width: 55px; height: 55px; border-radius: 50%; transition: all 0.3s;">
                                         <i class="fa-solid fa-hand-holding-heart fa-xl"></i>
                                     </div>
-                                    <h6 class="fw-bold mb-1 text-dark">Buscar Trabajo</h6>
+                                    <h6 class="fw-bold mb-1 text-dark">Buscar Pituto</h6>
                                     <p class="text-muted small mb-0">Quiero ser Cuidador/a</p>
                                 </div>
                             </div>
@@ -51,7 +51,7 @@
                                         style="width: 55px; height: 55px; border-radius: 50%; transition: all 0.3s;">
                                         <i class="fa-solid fa-briefcase fa-xl"></i>
                                     </div>
-                                    <h6 class="fw-bold mb-1 text-dark">Ofrecer Trabajo</h6>
+                                    <h6 class="fw-bold mb-1 text-dark">Ofrecer Pituto</h6>
                                     <p class="text-muted small mb-0">Quiero buscar un cuidador</p>
                                 </div>
                             </div>
@@ -70,6 +70,48 @@
                     {{ form.username }}
                     {% if form.username.errors %}
                     <div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="row g-2">
+                    <div class="col-6 mb-3">
+                        <label class="form-label fw-semibold small text-dark">Nombres</label>
+                        {{ form.nombres }}
+                        {% if form.nombres.errors %}
+                        <div class="text-danger small mt-1">{{ form.nombres.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-6 mb-3">
+                        <label class="form-label fw-semibold small text-dark">Apellidos</label>
+                        {{ form.apellidos }}
+                        {% if form.apellidos.errors %}
+                        <div class="text-danger small mt-1">{{ form.apellidos.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="row g-2">
+                    <div class="col-6 mb-3">
+                        <label class="form-label fw-semibold small text-dark">RUT (Ej: 12.345.678-9)</label>
+                        {{ form.rut }}
+                        {% if form.rut.errors %}
+                        <div class="text-danger small mt-1">{{ form.rut.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-6 mb-3">
+                        <label class="form-label fw-semibold small text-dark">Teléfono</label>
+                        {{ form.telefono }}
+                        {% if form.telefono.errors %}
+                        <div class="text-danger small mt-1">{{ form.telefono.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small text-dark">Dirección (Opcional)</label>
+                    {{ form.direccion }}
+                    {% if form.direccion.errors %}
+                    <div class="text-danger small mt-1">{{ form.direccion.errors.0 }}</div>
                     {% endif %}
                 </div>
 
@@ -100,42 +142,7 @@
                 <!-- Caregiver Specific Fields -->
                 <div id="campos-cuidador">
                     <hr class="my-4 text-muted">
-                    <h5 class="fw-bold mb-3 text-primary"><i class="fa-solid fa-id-card"></i> Información de Cuidador
-                    </h5>
-
-                    <div class="row g-2">
-                        <div class="col-6 mb-3">
-                            <label class="form-label fw-semibold small text-dark">Nombres</label>
-                            {{ form.nombres }}
-                            {% if form.nombres.errors %}
-                            <div class="text-danger small mt-1">{{ form.nombres.errors.0 }}</div>
-                            {% endif %}
-                        </div>
-                        <div class="col-6 mb-3">
-                            <label class="form-label fw-semibold small text-dark">Apellidos</label>
-                            {{ form.apellidos }}
-                            {% if form.apellidos.errors %}
-                            <div class="text-danger small mt-1">{{ form.apellidos.errors.0 }}</div>
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold small text-dark">RUT (ej: 12.345.678-9)</label>
-                        {{ form.rut }}
-                        {% if form.rut.errors %}
-                        <div class="text-danger small mt-1">{{ form.rut.errors.0 }}</div>
-                        {% endif %}
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold small text-dark">Teléfono Celular (ej: +56 9 1234
-                            5678)</label>
-                        {{ form.telefono }}
-                        {% if form.telefono.errors %}
-                        <div class="text-danger small mt-1">{{ form.telefono.errors.0 }}</div>
-                        {% endif %}
-                    </div>
+                    <h5 class="fw-bold mb-3 text-primary"><i class="fa-solid fa-id-card"></i> Información extra de Cuidador</h5>
 
                     <div class="mb-3">
                         <label class="form-label fw-semibold small text-dark">Habilidades o Competencias</label>
@@ -146,21 +153,32 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-semibold small text-dark">Carnet de Cuidador (Documento /
-                            Foto)</label>
+                        <label class="form-label fw-semibold small text-dark">Carnet de Cuidador (jpg, png, jpeg)</label>
                         {{ form.carnet_cuidador }}
-                        <div class="form-text text-muted small">Por favor adjunta una foto o documento de tu credencial
-                            o certificado de cuidador.</div>
+                        <div class="form-text text-muted small">Por favor adjunta una foto o captura de tu credencial o certificado de cuidador.</div>
                         {% if form.carnet_cuidador.errors %}
                         <div class="text-danger small mt-1">{{ form.carnet_cuidador.errors.0 }}</div>
                         {% endif %}
                     </div>
                 </div>
+                
+                <div class="mb-4 mt-4 bg-light p-3 rounded-3 border">
+                    <div class="form-check d-flex align-items-center">
+                        {{ form.acepta_terminos }}
+                        <label class="form-check-label ms-2 small text-dark" for="{{ form.acepta_terminos.id_for_label }}">
+                            He leído y acepto los <a href="/terminos-y-condiciones/" target="_blank" class="fw-bold text-primary text-decoration-none">Términos y Condiciones</a> y las Políticas de Privacidad de Pitutea.
+                        </label>
+                    </div>
+                    {% if form.acepta_terminos.errors %}
+                    <div class="text-danger small mt-1 ms-4"><i class="fa-solid fa-circle-exclamation"></i> {{ form.acepta_terminos.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
                 <div class="d-flex justify-content-center">
-                    <button type="submit" class="btn btn-primary w-50 fw-bold py-3 rounded-3 mt-4 shadow-sm">
+                    <button type="submit" class="btn btn-primary w-50 fw-bold py-3 rounded-3 mt-2 shadow-sm">
                         <i class="fa-solid fa-user-plus"></i>&nbsp; Crear mi cuenta
                     </button>&nbsp;
-                    <button type="reset" class="btn btn-secondary w-50 fw-bold py-3 rounded-3 mt-4 shadow-sm">
+                    <button type="reset" class="btn btn-secondary w-50 fw-bold py-3 rounded-3 mt-2 shadow-sm">
                         <i class="fa-solid fa-trash"></i>&nbsp; Limpiar
                     </button>
                 </div>
@@ -170,6 +188,8 @@
                 <span class="text-muted small">¿Ya tienes cuenta?</span>
                 <a href="{% url 'login' %}" class="fw-bold text-primary text-decoration-none small">Ingresa aquí</a>
             </div>
+            <br>
+            <br>
         </div>
     </div>
 </div>

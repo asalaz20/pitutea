@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}Mi Bitácora | Pitutea{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+    <div>
+        <h1 class="h4 fw-bold text-dark mb-1">Mis Pitutos</h1>
+        <p class="text-muted small mb-0">Revisa el historial de los pitutos a los que has postulado o realizado.</p>
+    </div>
+</div>
+
+<div class="row g-3">
+    {% for postulacion in postulaciones %}
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card h-100 border-0 shadow-sm rounded-4 position-relative">
+            <div class="card-body d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="card-title fw-bold mb-0 text-dark">{{ postulacion.pituto.titulo }}</h5>
+                    <span class="badge {% if postulacion.pituto.activo %}text-bg-success{% else %}text-bg-secondary{% endif %} rounded-pill">
+                        {% if postulacion.pituto.activo %}Postulado{% else %}Finalizado / Inactivo{% endif %}
+                    </span>
+                </div>
+                
+                <p class="text-muted small mb-3"><i class="fa-regular fa-clock me-1"></i> Postulaste el {{ postulacion.fecha_postulacion|date:"d M Y" }}</p>
+                
+                <div class="mb-3 small text-muted flex-grow-1">
+                    <strong>📍 Lugar:</strong> {{ postulacion.pituto.comuna|default:"Remoto" }}<br>
+                    <strong>👤 Oferente:</strong> {{ postulacion.pituto.creador.perfil.nombres|default:postulacion.pituto.creador.username }}<br>
+                </div>
+                
+                <div class="mt-auto pt-3 border-top">
+                    <span class="fs-5 fw-bold text-success">{{ postulacion.pituto.pago }}</span>
+                    <span class="text-muted small">/ {{ postulacion.pituto.tipo_pago }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-light text-center border rounded-4 py-5 shadow-sm" role="alert">
+            <span class="fs-1 d-block mb-3">💼</span>
+            <h5 class="fw-bold text-dark">Aún no tienes pitutos registrados</h5>
+            <p class="text-muted small mb-4">Explora las ofertas disponibles y postula para empezar a llenar tu bitácora.</p>
+            <a href="{% url 'listar_ofertas' %}" class="btn btn-primary fw-bold rounded-pill px-4 shadow-sm">Ver Ofertas Disponibles</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -11,14 +11,22 @@ class RegistroForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control rounded-3', 'placeholder': '••••••••'}), label='Contraseña')
     password_confirm = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control rounded-3', 'placeholder': '••••••••'}), label='Confirmar Contraseña')
     rol = forms.ChoiceField(choices=Perfil.ROL_CHOICES, widget=forms.Select(attrs={'class': 'form-select rounded-3 py-2'}), label='¿Qué vienes a hacer?')
+    acepta_terminos = forms.BooleanField(
+        required=True,
+        error_messages={'required': 'Debes aceptar los términos y condiciones para registrarte.'},
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
     
-    # Campos adicionales para cuidadores
+    # Campos adicionales (Comunes)
     nombres = forms.CharField(max_length=150, required=False, label='Nombres', widget=forms.TextInput(attrs={'class': 'form-control rounded-3', 'placeholder': 'Ej: Juan Andrés'}))
     apellidos = forms.CharField(max_length=150, required=False, label='Apellidos', widget=forms.TextInput(attrs={'class': 'form-control rounded-3', 'placeholder': 'Ej: Pérez Gómez'}))
     rut = forms.CharField(max_length=20, required=False, label='RUT', widget=forms.TextInput(attrs={'class': 'form-control rounded-3', 'placeholder': 'Ej: 12.345.678-9'}))
+    direccion = forms.CharField(max_length=200, required=False, label='Dirección', widget=forms.TextInput(attrs={'class': 'form-control rounded-3', 'placeholder': 'Ej: Av. Principal 123 (Opcional)'}))
     telefono = forms.CharField(max_length=20, required=False, label='Teléfono Celular', widget=forms.TextInput(attrs={'class': 'form-control rounded-3', 'placeholder': 'Ej: +56 9 1234 5678'}))
+    
+    # Campos adicionales para cuidadores
     habilidades = forms.CharField(required=False, label='Habilidades o Competencias', widget=forms.Textarea(attrs={'class': 'form-control rounded-3', 'rows': 3, 'placeholder': 'Cuéntanos qué sabes hacer, qué herramientas manejas...'}))
-    carnet_cuidador = forms.FileField(required=False, label='Carnet de Cuidador', widget=forms.ClearableFileInput(attrs={'class': 'form-control rounded-3'}))
+    carnet_cuidador = forms.ImageField(required=False, label='Carnet de Cuidador', widget=forms.ClearableFileInput(attrs={'class': 'form-control rounded-3', 'accept': 'image/*'}))
 
     class Meta:
         model = User
@@ -41,30 +49,32 @@ class RegistroForm(forms.ModelForm):
             self.add_error("password_confirm", "Las contraseñas no coinciden.")
 
         rol = cleaned_data.get("rol")
+        nombres = cleaned_data.get("nombres")
+        apellidos = cleaned_data.get("apellidos")
+        rut = cleaned_data.get("rut")
+        telefono = cleaned_data.get("telefono")
+
+        if not nombres:
+            self.add_error("nombres", "Los nombres son requeridos.")
+        if not apellidos:
+            self.add_error("apellidos", "Los apellidos son requeridos.")
+        if not rut:
+            self.add_error("rut", "El RUT es requerido.")
+        elif rut:
+            if not self.validar_rut(rut):
+                self.add_error("rut", "El RUT ingresado no es válido.")
+            else:
+                # Validar RUT único por rol
+                rut_norm = normalizar_rut(rut)
+                if Perfil.objects.filter(rut=rut_norm, rol=rol).exists():
+                    self.add_error("rut", f"Este RUT ya está registrado para el rol {rol}.")
+        if not telefono:
+            self.add_error("telefono", "El teléfono celular es requerido.")
+
         if rol == 'CUIDADOR':
-            nombres = cleaned_data.get("nombres")
-            apellidos = cleaned_data.get("apellidos")
-            rut = cleaned_data.get("rut")
-            telefono = cleaned_data.get("telefono")
             habilidades = cleaned_data.get("habilidades")
             carnet_cuidador = cleaned_data.get("carnet_cuidador")
-
-            if not nombres:
-                self.add_error("nombres", "Los nombres son requeridos para cuidadores.")
-            if not apellidos:
-                self.add_error("apellidos", "Los apellidos son requeridos para cuidadores.")
-            if not rut:
-                self.add_error("rut", "El RUT es requerido para cuidadores.")
-            elif rut:
-                if not self.validar_rut(rut):
-                    self.add_error("rut", "El RUT ingresado no es válido.")
-                else:
-                    # Validar RUT único para cuidadores
-                    rut_norm = normalizar_rut(rut)
-                    if Perfil.objects.filter(rut=rut_norm, rol='CUIDADOR').exists():
-                        self.add_error("rut", "Este RUT ya está registrado por otro cuidador.")
-            if not telefono:
-                self.add_error("telefono", "El teléfono celular es requerido para cuidadores.")
+            
             if not habilidades:
                 self.add_error("habilidades", "Las habilidades o competencias son requeridas para cuidadores.")
             if not carnet_cuidador:
@@ -102,20 +112,20 @@ class RegistroForm(forms.ModelForm):
         user.set_password(self.cleaned_data["password"])
         user.is_active = False
         
-        rol = self.cleaned_data['rol']
-        if rol == 'CUIDADOR':
-            user.first_name = self.cleaned_data.get('nombres', '')
-            user.last_name = self.cleaned_data.get('apellidos', '')
+        user.first_name = self.cleaned_data.get('nombres', '')
+        user.last_name = self.cleaned_data.get('apellidos', '')
             
         if commit:
             user.save()
+            rol = self.cleaned_data['rol']
             perfil = Perfil.objects.create(
                 usuario=user,
-                rol=rol
+                rol=rol,
+                rut=normalizar_rut(self.cleaned_data.get('rut')),
+                telefono=self.cleaned_data.get('telefono'),
+                direccion=self.cleaned_data.get('direccion')
             )
             if rol == 'CUIDADOR':
-                perfil.rut = normalizar_rut(self.cleaned_data.get('rut'))
-                perfil.telefono = self.cleaned_data.get('telefono')
                 perfil.habilidades = self.cleaned_data.get('habilidades')
                 perfil.carnet_cuidador = self.cleaned_data.get('carnet_cuidador')
                 perfil.save()

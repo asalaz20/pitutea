@@ -248,6 +248,15 @@ def postular_pituto(request, oferta_id):
     
     return HttpResponse("Método no permitido", status=405)
 
+@login_required
+def bitacora_cuidador(request):
+    if request.user.perfil.rol != 'CUIDADOR':
+        return redirect('listar_ofertas')
+        
+    postulaciones = Postulacion.objects.filter(usuario=request.user).order_by('-fecha_postulacion')
+    return render(request, 'bitacora_cuidador.html', {'postulaciones': postulaciones})
+
+
 
 # FASE 3: PANEL OFERENTE
 @login_required
@@ -283,3 +292,47 @@ def ver_postulantes(request, pituto_id):
     pituto = get_object_or_404(Pituto, id=pituto_id, creador=request.user)
     postulaciones = pituto.postulaciones.all().order_by('-fecha_postulacion')
     return render(request, 'ver_postulantes.html', {'pituto': pituto, 'postulaciones': postulaciones})
+
+@login_required
+def editar_pituto(request, pituto_id):
+    if request.user.perfil.rol != 'OFERENTE':
+        return redirect('listar_ofertas')
+        
+    pituto = get_object_or_404(Pituto, id=pituto_id, creador=request.user)
+    
+    if pituto.postulaciones.exists():
+        messages.error(request, "No puedes editar este pituto porque ya tiene postulantes.")
+        return redirect('panel_oferente')
+
+    if request.method == 'POST':
+        # Almacenar pago antiguo antes de enlazar el form
+        old_pago = pituto.pago
+        form = PitutoForm(request.POST, instance=pituto)
+        
+        if form.is_valid():
+            nuevo_pituto = form.save(commit=False)
+            if nuevo_pituto.pago != old_pago:
+                nuevo_pituto.pago_anterior = old_pago
+            nuevo_pituto.save()
+            messages.success(request, "Pituto actualizado correctamente.")
+            return redirect('panel_oferente')
+    else:
+        form = PitutoForm(instance=pituto)
+        
+    return render(request, 'editar_pituto.html', {'form': form, 'pituto': pituto})
+
+@login_required
+def archivar_pituto(request, pituto_id):
+    if request.user.perfil.rol != 'OFERENTE':
+        return redirect('listar_ofertas')
+        
+    pituto = get_object_or_404(Pituto, id=pituto_id, creador=request.user)
+    
+    if pituto.postulaciones.exists():
+        messages.error(request, "No puedes archivar este pituto porque ya tiene postulantes.")
+    else:
+        pituto.activo = False
+        pituto.save()
+        messages.success(request, "Pituto archivado correctamente.")
+        
+    return redirect('panel_oferente')

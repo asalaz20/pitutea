@@ -1,5 +1,15 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
+from django.core.files.base import ContentFile
+from PIL import Image
+import os
+from io import BytesIO
+
+def validar_tamano_imagen(file):
+    max_size_mb = 5
+    if file.size > max_size_mb * 1024 * 1024:
+        raise ValidationError(f"La imagen no debe superar los {max_size_mb}MB.")
 
 # Categorías predefinidas comunes para facilitar el filtrado y matching
 CATEGORIAS_CHOICES = [
@@ -21,7 +31,8 @@ class Perfil(models.Model):
     
     # Nuevos campos para Perfil Avanzado y Matching
     rut = models.CharField(max_length=20, blank=True, null=True, verbose_name="RUT")
-    carnet_cuidador = models.FileField(upload_to='carnets/', blank=True, null=True, verbose_name="Carnet de Cuidador")
+    direccion = models.CharField(max_length=200, blank=True, null=True, verbose_name="Dirección")
+    carnet_cuidador = models.ImageField(upload_to='carnets/', blank=True, null=True, verbose_name="Carnet de Cuidador", validators=[validar_tamano_imagen])
     comuna = models.CharField(max_length=100, blank=True, null=True, verbose_name="Comuna de residencia")
     categoria_interes = models.CharField(max_length=20, choices=CATEGORIAS_CHOICES, blank=True, null=True, verbose_name="Categoría de mayor interés")
     habilidades = models.TextField(blank=True, null=True, verbose_name="Habilidades o experiencia")
@@ -45,6 +56,36 @@ class Perfil(models.Model):
 
     def __str__(self):
         return f"{self.usuario.username} - {self.get_rol_display()}"
+        
+    def save(self, *args, **kwargs):
+        # Optimizar imagen del carnet al guardar
+        if self.carnet_cuidador and not getattr(self, '_carnet_optimizado', False):
+            try:
+                # Abrir imagen con Pillow
+                img = Image.open(self.carnet_cuidador)
+                
+                # Convertir a RGB si es necesario
+                if img.mode in ("RGBA", "P"):
+                    img = img.convert("RGB")
+                    
+                # Redimensionar la imagen para no ocupar espacio innecesario
+                img.thumbnail((1024, 1024), Image.Resampling.LANCZOS)
+                
+                # Guardar en memoria optimizada (WEBP)
+                output = BytesIO()
+                img.save(output, format='WEBP', quality=85)
+                output.seek(0)
+                
+                # Generar nuevo nombre y asignar el contenido optimizado
+                filename = os.path.splitext(os.path.basename(self.carnet_cuidador.name))[0] + '.webp'
+                self.carnet_cuidador = ContentFile(output.read(), name=filename)
+                
+                # Marcar para evitar bucles si se vuelve a llamar save en el ciclo de vida del objeto
+                self._carnet_optimizado = True
+            except Exception:
+                pass # Si hay cualquier problema con la imagen (por ej., no era imagen o estaba corrupta), se guarda original
+                
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Perfil de Usuario"
@@ -66,6 +107,7 @@ class Pituto(models.Model):
     comuna = models.CharField(max_length=100, blank=True, null=True, verbose_name="Comuna (Dejar en blanco si es Remoto)")
     
     pago = models.CharField(max_length=50, verbose_name="Monto a pagar (Ej: $15.000)")
+    pago_anterior = models.CharField(max_length=50, blank=True, null=True, verbose_name="Monto anterior (tachado)")
     tipo_pago = models.CharField(max_length=20, choices=TIPO_PAGO_CHOICES, default='tarea', verbose_name="Modalidad de pago")
     flexibilidad = models.CharField(max_length=100, verbose_name="Etiqueta de Flexibilidad (Ej: Remoto / Noche)")
     activo = models.BooleanField(default=True, verbose_name="¿Está activo?")

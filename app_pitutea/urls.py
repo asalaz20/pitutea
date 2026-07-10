@@ -6,6 +6,7 @@ urlpatterns = [
     # Cuidadores / Ofertas
     path('', views.listar_ofertas, name='listar_ofertas'),
     path('postular/<int:oferta_id>/', views.postular_pituto, name='postular_pituto'),
+    path('bitacora/', views.bitacora_cuidador, name='bitacora_cuidador'),
     
     # Autenticación y Perfil
     path('registro/', views.registro_usuario, name='registro'),
@@ -18,5 +19,7 @@ urlpatterns = [
     # Panel Oferente
     path('panel/', views.panel_oferente, name='panel_oferente'),
     path('panel/crear/', views.crear_pituto, name='crear_pituto'),
+    path('panel/pituto/<int:pituto_id>/editar/', views.editar_pituto, name='editar_pituto'),
+    path('panel/pituto/<int:pituto_id>/archivar/', views.archivar_pituto, name='archivar_pituto'),
     path('panel/pituto/<int:pituto_id>/postulantes/', views.ver_postulantes, name='ver_postulantes'),
 ]

@@ -21,9 +21,21 @@
                     </span>
                 </div>
                 <p class="text-muted small mb-3">Publicado el {{ pituto.fecha_creacion|date:"d M Y" }}</p>
-                <a href="{% url 'ver_postulantes' pituto.id %}" class="btn btn-outline-primary w-100 rounded-3 fw-bold">
-                    Ver Postulantes ({{ pituto.postulaciones.count }})
-                </a>
+                <div class="d-flex flex-column gap-2">
+                    <a href="{% url 'ver_postulantes' pituto.id %}" class="btn btn-outline-primary w-100 rounded-3 fw-bold">
+                        Ver Postulantes ({{ pituto.postulaciones.count }})
+                    </a>
+                    {% if pituto.postulaciones.count == 0 and pituto.activo %}
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'editar_pituto' pituto.id %}" class="btn btn-warning w-50 rounded-3 fw-bold text-dark">
+                            <i class="fa-solid fa-pen-to-square"></i> Editar
+                        </a>
+                        <a href="{% url 'archivar_pituto' pituto.id %}" class="btn btn-secondary w-50 rounded-3 fw-bold" onclick="return confirm('¿Seguro que deseas archivar este pituto?');">
+                            <i class="fa-solid fa-box-archive"></i> Archivar
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
