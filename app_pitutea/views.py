@@ -36,7 +36,7 @@ def registro_usuario(request):
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             token = default_token_generator.make_token(user)
             domain = get_current_site(request).domain
-            verification_link = f"http://{domain}/verificar-correo/{uid}/{token}/"
+            verification_link = f"https://{domain}/verificar-correo/{uid}/{token}/"
             
             # Enviar correo de activación
             subject = "Verifica tu correo electrónico - Pitutea"
