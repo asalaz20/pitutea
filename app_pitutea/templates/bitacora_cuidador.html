@@ -37,12 +37,15 @@
                     {% endif %}
                 </div>
 
-                <div class="mb-3 small text-muted flex-grow-1">
+                <div class="mb-3 whitespace-nowrap small text-muted flex-grow-1">
                     <strong>👤 Oferente:</strong> {{ pituto.creador.get_full_name|default:pituto.creador.username }}<br>
                     <strong>💰 Pago:</strong> {{ pituto.pago_formateado }}<br>
                     {% if pituto.estado == 'FINALIZADO' %}
                     <strong>📅 Finalizado:</strong> {{ pituto.fecha_finalizacion|date:"d M Y" }}<br>
                     {% endif %}
+                    <a href="{% url 'reportar' %}?pituto_id={{ pituto.id }}" class="text-danger small mt-2 d-block text-decoration-none">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Reportar publicación
+                    </a>
                 </div>
 
                 {% if pituto.estado == 'FINALIZADO' %}
@@ -104,6 +107,9 @@
                 <div class="mb-3 small text-muted flex-grow-1">
                     <strong>📍 Lugar:</strong> {{ postulacion.pituto.comuna|default:"Remoto" }}<br>
                     <strong>👤 Oferente:</strong> {{ postulacion.pituto.creador.get_full_name|default:postulacion.pituto.creador.username }}<br>
+                    <a href="{% url 'reportar' %}?pituto_id={{ postulacion.pituto.id }}" class="text-danger small mt-2 d-block text-decoration-none">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Reportar publicación
+                    </a>
                 </div>
 
                 <div class="mt-auto pt-3 border-top">

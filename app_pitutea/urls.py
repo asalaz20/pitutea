@@ -27,6 +27,9 @@ urlpatterns = [
 
     # Cuidador califica al oferente (desde su bitácora)
     path('bitacora/pituto/<int:pituto_id>/calificar/', views.calificar_oferente, name='calificar_oferente'),
+    path('reportar/', views.reportar, name='reportar'),
+    path('api/visitas/', views.incrementar_visitas, name='incrementar_visitas'),
+    path('api/regiones-comunas/', views.obtener_regiones_comunas, name='obtener_regiones_comunas'),
     
     # Páginas Legales
     path('terminos-y-condiciones/', views.terminos_condiciones, name='terminos_condiciones'),

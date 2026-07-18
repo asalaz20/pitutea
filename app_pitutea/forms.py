@@ -297,3 +297,35 @@ class PitutoForm(forms.ModelForm):
             'tipo_pago': forms.Select(attrs={'class': 'form-select rounded-3','placeholder': 'Seleccione ...'}),
             'flexibilidad': forms.TextInput(attrs={'class': 'form-control rounded-3', 'placeholder': 'Ej: Noche / Fines de semana'}),
         }
+
+class ReporteForm(forms.Form):
+    motivo = forms.ChoiceField(
+        choices=[],  # Se define dinámicamente en __init__
+        widget=forms.Select(attrs={'class': 'form-select rounded-3'}),
+        label='Motivo del Reporte'
+    )
+    detalles = forms.CharField(
+        widget=forms.Textarea(attrs={'class': 'form-control rounded-3', 'rows': 4, 'placeholder': 'Describe detalladamente la situación...'}),
+        label='Detalles / Comentarios',
+        required=True
+    )
+    
+    def __init__(self, *args, **kwargs):
+        tipo_reporte = kwargs.pop('tipo_reporte', 'pituto')
+        super().__init__(*args, **kwargs)
+        if tipo_reporte == 'cuidador':
+            self.fields['motivo'].choices = [
+                ('', 'Selecciona un motivo...'),
+                ('COMPORTAMIENTO', 'Comportamiento inadecuado / Falta a las buenas costumbres'),
+                ('INASISTENCIA', 'No se presentó al trabajo / Inasistencia'),
+                ('DESEMPENIO', 'Desempeño insatisfactorio o negligencia'),
+                ('OTRO', 'Otro motivo')
+            ]
+        else:
+            self.fields['motivo'].choices = [
+                ('', 'Selecciona un motivo...'),
+                ('LENGUAJE', 'Lenguaje inapropiado / Falta a las buenas costumbres'),
+                ('CONTACTO', 'El oferente nunca me contactó'),
+                ('FALSO', 'Publicación falsa o sospechosa'),
+                ('OTRO', 'Otro motivo')
+            ]

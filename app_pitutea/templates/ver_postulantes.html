@@ -25,31 +25,14 @@
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                     <div class="flex-grow-1">
                         <h5 class="fw-bold mb-1">
-                            {% if post.usuario.first_name or post.usuario.last_name %}
-                                {{ post.usuario.first_name }} {{ post.usuario.last_name }}
-                                <span class="text-muted small fw-normal">({{ post.usuario.username }})</span>
-                            {% else %}
-                                {{ post.usuario.username }}
-                            {% endif %}
+                            {{ post.usuario.username }}
                             {% if pituto.cuidador_seleccionado == post.usuario %}
                                 <span class="badge bg-success ms-1 small">Seleccionado</span>
                             {% endif %}
                         </h5>
                         <p class="text-muted small mb-1">
-                            📞 {{ post.usuario.perfil.telefono|default:"No registró teléfono" }}<br>
-                            📍 {{ post.usuario.perfil.comuna|default:"Comuna no especificada" }}<br>
-                            ✉️ {{ post.usuario.email }}<br>
+                            📞 <strong>Teléfono:</strong> {{ post.usuario.perfil.telefono|default:"No registró teléfono" }}<br>
                             {% if post.usuario.perfil.rol == 'CUIDADOR' %}
-                                🆔 <strong>RUT:</strong> {{ post.usuario.perfil.rut|default:"No registrado" }}<br>
-                                🪪 <strong>Carnet de Cuidador:</strong>
-                                {% if post.usuario.perfil.carnet_cuidador %}
-                                    <a href="{{ post.usuario.perfil.carnet_cuidador.url }}" target="_blank" class="badge bg-info text-dark text-decoration-none">
-                                        <i class="fa-solid fa-file-pdf"></i> Ver Documento
-                                    </a>
-                                {% else %}
-                                    <span class="text-danger">No adjuntado</span>
-                                {% endif %}
-                                <br>
                                 🔍 <strong>Estado de Verificación:</strong>
                                 {% with estado=post.usuario.perfil.estado_verificacion %}
                                     {% if estado == 'VERIFICADO' %}<span class="badge text-bg-success">Verificado</span>
@@ -65,13 +48,16 @@
                     <div class="text-end align-self-start d-flex flex-column align-items-end gap-2">
                         <span class="text-muted small">{{ post.fecha_postulacion|date:"d M H:i" }}</span>
                         {% if pituto.estado == 'ACTIVO' %}
-                        <form method="post" action="{% url 'seleccionar_cuidador' pituto.id post.id %}" onsubmit="return confirm('¿Confirmas seleccionar a {{ post.usuario.get_full_name|default:post.usuario.username }} para este pituto?');">
+                        <form method="post" action="{% url 'seleccionar_cuidador' pituto.id post.id %}" onsubmit="return confirm('¿Confirmas seleccionar a {{ post.usuario.username }} para este pituto?');">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-primary btn-sm rounded-pill px-3 fw-bold shadow-sm">
                                 <i class="fa-solid fa-user-check me-1"></i> Seleccionar
                             </button>
                         </form>
                         {% endif %}
+                        <a href="{% url 'reportar' %}?cuidador_id={{ post.usuario.id }}&pituto_id={{ pituto.id }}" class="text-danger small text-decoration-none mt-1">
+                            <i class="fa-solid fa-triangle-exclamation"></i> Reportar Cuidador
+                        </a>
                     </div>
                 </div>
             </div>

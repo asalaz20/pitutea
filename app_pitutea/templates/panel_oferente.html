@@ -43,11 +43,14 @@
                     <strong>💰 Pago:</strong> <span class="fw-bold text-success">{{ pituto.pago_formateado }}</span> / {{ pituto.tipo_pago }}
                 </div>
 
-                {% if pituto.estado == 'OTORGADO' %}
+                {% if pituto.estado == 'OTORGADO' or pituto.estado == 'FINALIZADO' %}
                 <p class="small mb-2">
                     <i class="fa-solid fa-user me-1 text-warning"></i>
                     <strong>Cuidador:</strong>
-                    {{ pituto.cuidador_seleccionado.get_full_name|default:pituto.cuidador_seleccionado.username }}
+                    {{ pituto.cuidador_seleccionado.username }}
+                    <a href="{% url 'reportar' %}?cuidador_id={{ pituto.cuidador_seleccionado.id }}&pituto_id={{ pituto.id }}" class="text-danger small ms-2 text-decoration-none">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Reportar
+                    </a>
                 </p>
                 {% endif %}
 

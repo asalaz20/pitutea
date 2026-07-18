@@ -16,7 +16,7 @@ from django.urls import reverse
 from django.conf import settings
 
 from .models import Pituto, Postulacion, Perfil
-from .forms import RegistroForm, PerfilForm, PitutoForm, normalizar_rut
+from .forms import RegistroForm, PerfilForm, PitutoForm, ReporteForm, normalizar_rut
 
 # FASE 2: MATCHING Y PERFIL
 
@@ -454,3 +454,146 @@ def calificar_oferente(request, pituto_id):
         return redirect('bitacora_cuidador')
 
     return render(request, 'calificar_oferente.html', {'pituto': pituto})
+
+@login_required
+def reportar(request):
+    pituto_id = request.GET.get('pituto_id') or request.POST.get('pituto_id')
+    cuidador_id = request.GET.get('cuidador_id') or request.POST.get('cuidador_id')
+    
+    pituto = None
+    cuidador = None
+    tipo_reporte = 'pituto'
+    
+    if pituto_id:
+        pituto = get_object_or_404(Pituto, id=pituto_id)
+        
+    if cuidador_id:
+        cuidador = get_object_or_404(User, id=cuidador_id)
+        tipo_reporte = 'cuidador'
+        
+    user_rol = getattr(request.user.perfil, 'rol', None)
+    if user_rol == 'CUIDADOR' and tipo_reporte == 'cuidador':
+        messages.error(request, "Acción no permitida.")
+        return redirect('listar_ofertas')
+    if user_rol == 'OFERENTE' and tipo_reporte == 'pituto':
+        messages.error(request, "Acción no permitida.")
+        return redirect('panel_oferente')
+
+    if request.method == 'POST':
+        form = ReporteForm(request.POST, tipo_reporte=tipo_reporte)
+        if form.is_valid():
+            motivo = form.cleaned_data['motivo']
+            detalles = form.cleaned_data['detalles']
+            motivo_display = dict(form.fields['motivo'].choices).get(motivo, motivo)
+            
+            reporter = request.user
+            reporter_perfil = getattr(reporter, 'perfil', None)
+            reporter_telefono = reporter_perfil.telefono if reporter_perfil else 'No registrado'
+            
+            subject = f"[REPORTE PITUTEA] - {motivo_display}"
+            
+            body = f"SE HA REGISTRADO UN REPORTE EN LA PLATAFORMA PITUTEA\n"
+            body += f"==================================================\n\n"
+            body += f"TIPO DE REPORTE: Reporte de {tipo_reporte.capitalize()}\n\n"
+            
+            body += f"DATOS DEL REPORTANTE:\n"
+            body += f"---------------------\n"
+            body += f"- Usuario: {reporter.username}\n"
+            body += f"- Nombre completo: {reporter.get_full_name()}\n"
+            body += f"- Correo: {reporter.email}\n"
+            body += f"- Teléfono: {reporter_telefono}\n"
+            body += f"- Rol: {user_rol}\n\n"
+            
+            body += f"DATOS DE LA DENUNCIA:\n"
+            body += f"---------------------\n"
+            if tipo_reporte == 'pituto' and pituto:
+                body += f"- Pituto ID: {pituto.id}\n"
+                body += f"- Título del Pituto: {pituto.titulo}\n"
+                body += f"- Creador del Pituto (Oferente): {pituto.creador.username} ({pituto.creador.get_full_name()})\n\n"
+            elif tipo_reporte == 'cuidador' and cuidador:
+                body += f"- Cuidador ID: {cuidador.id}\n"
+                body += f"- Cuidador (Usuario): {cuidador.username}\n"
+                body += f"- Nombre del Cuidador: {cuidador.get_full_name()}\n"
+                if pituto:
+                    body += f"- Asociado al Pituto ID: {pituto.id}\n"
+                    body += f"- Título del Pituto: {pituto.titulo}\n\n"
+                else:
+                    body += f"\n"
+                    
+            body += f"MOTIVO DEL REPORTE:\n"
+            body += f"--------------------\n"
+            body += f"{motivo_display}\n\n"
+            
+            body += f"DETALLES / COMENTARIOS DEL REPORTANTE:\n"
+            body += f"--------------------------------------\n"
+            body += f"{detalles}\n\n"
+            
+            body += f"==================================================\n"
+            body += f"Mensaje generado automáticamente por el sistema de reportes de Pitutea.\n"
+            
+            try:
+                send_mail(
+                    subject=subject,
+                    message=body,
+                    from_email=settings.DEFAULT_FROM_EMAIL or 'no-reply@pitutea.cl',
+                    recipient_list=['contactopitutea@gmail.com'],
+                    fail_silently=False
+                )
+                messages.success(request, "Reporte enviado con éxito. Gracias por ayudarnos a mantener segura la comunidad.")
+            except Exception as e:
+                messages.error(request, "Hubo un error al enviar el reporte. Por favor, inténtalo de nuevo más tarde.")
+                
+            if user_rol == 'CUIDADOR':
+                return redirect('bitacora_cuidador')
+            else:
+                return redirect('panel_oferente')
+    else:
+        form = ReporteForm(tipo_reporte=tipo_reporte)
+        
+    context = {
+        'form': form,
+        'tipo_reporte': tipo_reporte,
+        'pituto': pituto,
+        'cuidador': cuidador
+    }
+    return render(request, 'reportar.html', context)
+
+def incrementar_visitas(request):
+    from django.http import JsonResponse
+    import os
+    from django.conf import settings
+    
+    file_path = os.path.join(settings.BASE_DIR, 'visitas.txt')
+    count = 0
+    if os.path.exists(file_path):
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                count = int(f.read().strip())
+        except ValueError:
+            pass
+            
+    session_key = 'visita_registrada'
+    if not request.session.get(session_key):
+        request.session[session_key] = True
+        count += 1
+        try:
+            with open(file_path, 'w', encoding='utf-8') as f:
+                f.write(str(count))
+        except Exception:
+            pass
+            
+    return JsonResponse({'visitas': count})
+
+def obtener_regiones_comunas(request):
+    import json
+    import os
+    from django.http import JsonResponse
+    from django.conf import settings
+    
+    json_path = os.path.join(settings.BASE_DIR, 'app_pitutea', 'static', 'assets', 'territoriochile.json')
+    try:
+        with open(json_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            return JsonResponse(data, safe=False)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

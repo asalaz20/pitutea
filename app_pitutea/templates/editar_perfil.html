@@ -63,8 +63,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const regionSelect = document.getElementById('id_region_select');
     const ciudadSelect = document.getElementById('id_ciudad_select');
     if (regionSelect && ciudadSelect) {
-        {% load static %}
-        fetch('{% static "assets/territoriochile.json" %}')
+        fetch('{% url "obtener_regiones_comunas" %}')
             .then(response => response.json())
             .then(data => {
                 regionSelect.addEventListener('change', function() {

@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.core import mail
 from django.contrib.auth.models import User
-from app_pitutea.models import Perfil, Pituto
+from app_pitutea.models import Perfil, Pituto, Postulacion
 
 class RegistroUsuarioTests(TestCase):
     def test_registro_usuario_sends_email_with_correct_link(self):
@@ -146,3 +146,187 @@ class PitutoFormattingTests(TestCase):
             flexibilidad='Finde'
         )
         self.assertEqual(pituto.pago_formateado, 'A convenir')
+
+class VerPostulantesPrivacyTests(TestCase):
+    def setUp(self):
+        # Crear oferente
+        self.oferente_user = User.objects.create_user(
+            username='oferente1',
+            email='oferente1@example.com',
+            password='password123',
+            first_name='Juan',
+            last_name='Perez'
+        )
+        self.oferente_perfil = Perfil.objects.create(
+            usuario=self.oferente_user,
+            rol='OFERENTE',
+            rut='11111111-1'
+        )
+        
+        # Crear cuidador/postulante
+        self.cuidador_user = User.objects.create_user(
+            username='cuidador1',
+            email='cuidador1@example.com',
+            password='password123',
+            first_name='Gisela',
+            last_name='Moreno'
+        )
+        self.cuidador_perfil = Perfil.objects.create(
+            usuario=self.cuidador_user,
+            rol='CUIDADOR',
+            rut='18674168-4',
+            telefono='941145250',
+            comuna='Santiago',
+            habilidades='Planchar'
+        )
+        
+        # Crear pituto
+        self.pituto = Pituto.objects.create(
+            creador=self.oferente_user,
+            titulo='Aseo hogar',
+            descripcion='Description',
+            pago='15000',
+            tipo_pago='Transferencia',
+            flexibilidad='Finde',
+            estado='ACTIVO'
+        )
+        
+        # Crear postulacion
+        self.postulacion = Postulacion.objects.create(
+            pituto=self.pituto,
+            usuario=self.cuidador_user
+        )
+
+    def test_ver_postulantes_hides_sensitive_information(self):
+        # Loguear como oferente
+        self.client.login(username='oferente1', password='password123')
+        
+        response = self.client.get(reverse('ver_postulantes', kwargs={'pituto_id': self.pituto.id}))
+        self.assertEqual(response.status_code, 200)
+        
+        html = response.content.decode('utf-8')
+        
+        # Debe mostrar los campos autorizados
+        self.assertIn('cuidador1', html) # Username
+        self.assertIn('941145250', html) # Teléfono
+        self.assertIn('Planchar', html) # Habilidades
+        
+        # No debe mostrar la información sensible
+        self.assertNotIn('Gisela', html) # Nombre de pila
+        self.assertNotIn('Moreno', html) # Apellido
+        self.assertNotIn('cuidador1@example.com', html) # Correo
+        self.assertNotIn('18674168-4', html) # RUT
+        self.assertNotIn('Ver Documento', html) # Enlace a carnet
+
+
+class ReportesFormAndMailTests(TestCase):
+    def setUp(self):
+        # Crear cuidador
+        self.cuidador_user = User.objects.create_user(
+            username='cuidador_reporter',
+            email='cuidador_reporter@example.com',
+            password='password123',
+            first_name='Maria',
+            last_name='Gonzalez'
+        )
+        self.cuidador_perfil = Perfil.objects.create(
+            usuario=self.cuidador_user,
+            rol='CUIDADOR',
+            rut='12345678-5',
+            telefono='999999999'
+        )
+        
+        # Crear oferente y pituto
+        self.oferente_user = User.objects.create_user(
+            username='oferente_reported',
+            email='oferente_reported@example.com',
+            password='password123'
+        )
+        self.oferente_perfil = Perfil.objects.create(
+            usuario=self.oferente_user,
+            rol='OFERENTE',
+            rut='22222222-2'
+        )
+        self.pituto = Pituto.objects.create(
+            creador=self.oferente_user,
+            titulo='Pituto Irregular',
+            descripcion='Description',
+            pago='20000',
+            tipo_pago='Transferencia',
+            flexibilidad='Finde',
+            estado='ACTIVO'
+        )
+
+    def test_reportar_pituto_sends_email_to_admin(self):
+        # Loguear cuidador
+        self.client.login(username='cuidador_reporter', password='password123')
+        
+        # Enviar reporte
+        response = self.client.post(reverse('reportar'), {
+            'pituto_id': self.pituto.id,
+            'motivo': 'CONTACTO',
+            'detalles': 'El oferente nunca me contactó después de postular.'
+        })
+        
+        # Debe redirigir a bitacora
+        self.assertRedirects(response, reverse('bitacora_cuidador'))
+        
+        # Verificar que el correo fue enviado
+        self.assertEqual(len(mail.outbox), 1)
+        email = mail.outbox[0]
+        
+        # Verificar destinatario
+        self.assertEqual(email.to, ['contactopitutea@gmail.com'])
+        
+        # Verificar asunto y cuerpo
+        self.assertIn("[REPORTE PITUTEA]", email.subject)
+        self.assertIn("El oferente nunca me contactó", email.subject)
+        self.assertIn("cuidador_reporter", email.body)
+        self.assertIn("Pituto Irregular", email.body)
+        self.assertIn("El oferente nunca me contactó después de postular.", email.body)
+
+class VisitaCounterTests(TestCase):
+    def setUp(self):
+        import os
+        from django.conf import settings
+        self.file_path = os.path.join(settings.BASE_DIR, 'visitas.txt')
+        if os.path.exists(self.file_path):
+            try:
+                os.remove(self.file_path)
+            except Exception:
+                pass
+
+    def tearDown(self):
+        import os
+        if os.path.exists(self.file_path):
+            try:
+                os.remove(self.file_path)
+            except Exception:
+                pass
+
+    def test_incrementar_visitas_api(self):
+        response = self.client.get(reverse('incrementar_visitas'))
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data['visitas'], 1)
+
+        response = self.client.get(reverse('incrementar_visitas'))
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data['visitas'], 1)
+
+        self.client.cookies.clear()
+        response = self.client.get(reverse('incrementar_visitas'))
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data['visitas'], 2)
+
+    def test_obtener_regiones_comunas_api(self):
+        response = self.client.get(reverse('obtener_regiones_comunas'))
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(isinstance(data, list))
+        self.assertGreater(len(data), 0)
+        first_region = data[0]
+        self.assertIn('nombre', first_region)
+        self.assertIn('provincias', first_region)

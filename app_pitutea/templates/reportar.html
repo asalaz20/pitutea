@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block title %}Reportar | Pitutea{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="card border-0 shadow-sm rounded-4 mt-2 mb-4 overflow-hidden">
+            <div style="height: 6px; background: linear-gradient(90deg, #dc3545 0%, #ffc107 100%);"></div>
+            <div class="card-body p-4">
+                <h2 class="fw-bold mb-1 text-danger">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    {% if tipo_reporte == 'cuidador' %}Reportar Cuidador{% else %}Reportar Pituto{% endif %}
+                </h2>
+                <p class="text-muted small mb-4">
+                    Ayúdanos a mantener nuestra comunidad segura. Si has detectado alguna conducta anómala o inapropiada, repórtala a continuación.
+                </p>
+
+                <!-- Tarjeta informativa sobre la denuncia -->
+                <div class="alert alert-light border rounded-3 p-3 mb-4">
+                    <h6 class="fw-bold mb-2 text-dark small text-uppercase tracking-wider">Detalles de la denuncia:</h6>
+                    {% if tipo_reporte == 'cuidador' and cuidador %}
+                        <div class="small mb-1"><strong>Cuidador Reportado:</strong> {{ cuidador.username }}</div>
+                        {% if pituto %}
+                        <div class="small"><strong>Trabajo Relacionado:</strong> {{ pituto.titulo }}</div>
+                        {% endif %}
+                    {% elif tipo_reporte == 'pituto' and pituto %}
+                        <div class="small mb-1"><strong>Publicación Reportada:</strong> {{ pituto.titulo }}</div>
+                        <div class="small"><strong>Oferente Creador:</strong> {{ pituto.creador.username }}</div>
+                    {% endif %}
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <!-- Elementos ocultos para preservar contexto -->
+                    {% if pituto %}
+                    <input type="hidden" name="pituto_id" value="{{ pituto.id }}">
+                    {% endif %}
+                    {% if cuidador %}
+                    <input type="hidden" name="cuidador_id" value="{{ cuidador.id }}">
+                    {% endif %}
+
+                    {% if form.errors %}
+                    <div class="alert alert-danger p-3 small rounded-3 mb-3">
+                        <ul class="mb-0 ps-3">
+                            {% for field, errors in form.errors.items %}
+                            {% for error in errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-dark">{{ form.motivo.label }}</label>
+                        {{ form.motivo }}
+                        {% if form.motivo.errors %}
+                        <div class="text-danger small mt-1">{{ form.motivo.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold small text-dark">{{ form.detalles.label }}</label>
+                        {{ form.detalles }}
+                        {% if form.detalles.errors %}
+                        <div class="text-danger small mt-1">{{ form.detalles.errors.0 }}</div>
+                        {% endif %}
+                        <div class="form-text text-muted small mt-1">Por favor sé lo más específico posible e incluye fechas, horas o detalles relevantes.</div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-danger w-50 fw-bold py-3 rounded-3 shadow-sm">
+                            <i class="fa-solid fa-paper-plane me-1"></i> Enviar Reporte
+                        </button>
+                        {% if request.user.perfil.rol == 'CUIDADOR' %}
+                        <a href="{% url 'bitacora_cuidador' %}" class="btn btn-outline-secondary w-50 fw-bold py-3 rounded-3 shadow-sm">
+                            Cancelar
+                        </a>
+                        {% else %}
+                        <a href="{% url 'panel_oferente' %}" class="btn btn-outline-secondary w-50 fw-bold py-3 rounded-3 shadow-sm">
+                            Cancelar
+                        </a>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -38,7 +38,7 @@
                                         <i class="fa-solid fa-hand-holding-heart fa-xl"></i>
                                     </div>
                                     <h6 class="fw-bold mb-1 text-dark">Buscar Pituto</h6>
-                                    <p class="text-muted small mb-0">Quiero ser Cuidador/a</p>
+                                    <p class="text-muted small mb-0">Soy Cuidador/a</p>
                                 </div>
                             </div>
                         </div>
@@ -52,7 +52,7 @@
                                         <i class="fa-solid fa-briefcase fa-xl"></i>
                                     </div>
                                     <h6 class="fw-bold mb-1 text-dark">Ofrecer Pituto</h6>
-                                    <p class="text-muted small mb-0">Quiero buscar un cuidador</p>
+                                    <p class="text-muted small mb-0">Busco persona</p>
                                 </div>
                             </div>
                         </div>
@@ -142,7 +142,12 @@
 
                 <div class="mb-3">
                     <label class="form-label fw-semibold small text-dark">Contraseña</label>
-                    {{ form.password }}
+                    <div class="input-group">
+                        {{ form.password }}
+                        <button class="btn btn-outline-secondary border-start-0 rounded-end-3 bg-light text-muted" type="button" id="togglePassword">
+                            <i class="fa-solid fa-eye" id="eyeIcon"></i>
+                        </button>
+                    </div>
                     {% if form.password.errors %}
                     <div class="text-danger small mt-1">{{ form.password.errors.0 }}</div>
                     {% endif %}
@@ -150,7 +155,12 @@
 
                 <div class="mb-3">
                     <label class="form-label fw-semibold small text-dark">Confirmar Contraseña</label>
-                    {{ form.password_confirm }}
+                    <div class="input-group">
+                        {{ form.password_confirm }}
+                        <button class="btn btn-outline-secondary border-start-0 rounded-end-3 bg-light text-muted" type="button" id="togglePasswordConfirm">
+                            <i class="fa-solid fa-eye" id="eyeIconConfirm"></i>
+                        </button>
+                    </div>
                     {% if form.password_confirm.errors %}
                     <div class="text-danger small mt-1">{{ form.password_confirm.errors.0 }}</div>
                     {% endif %}
@@ -159,7 +169,8 @@
                 <!-- Caregiver Specific Fields -->
                 <div id="campos-cuidador">
                     <hr class="my-4 text-muted">
-                    <h5 class="fw-bold mb-3 text-primary"><i class="fa-solid fa-id-card"></i> Información extra de Cuidador</h5>
+                    <h5 class="fw-bold mb-3 text-primary"><i class="fa-solid fa-id-card"></i> Información extra de
+                        Cuidador</h5>
 
                     <div class="mb-3">
                         <label class="form-label fw-semibold small text-dark">Habilidades o Competencias</label>
@@ -170,24 +181,30 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-semibold small text-dark">Carnet de Cuidador (jpg, png, jpeg)</label>
+                        <label class="form-label fw-semibold small text-dark">Carnet de Cuidador (jpg, png,
+                            jpeg)</label>
                         {{ form.carnet_cuidador }}
-                        <div class="form-text text-muted small">Por favor adjunta una foto o captura de tu credencial o certificado de cuidador.</div>
+                        <div class="form-text text-muted small">Por favor adjunta una foto o captura de tu credencial o
+                            certificado de cuidador.</div>
                         {% if form.carnet_cuidador.errors %}
                         <div class="text-danger small mt-1">{{ form.carnet_cuidador.errors.0 }}</div>
                         {% endif %}
                     </div>
                 </div>
-                
+
                 <div class="mb-4 mt-4 bg-light p-3 rounded-3 border">
                     <div class="form-check d-flex align-items-center">
                         {{ form.acepta_terminos }}
-                        <label class="form-check-label ms-2 small text-dark" for="{{ form.acepta_terminos.id_for_label }}">
-                            He leído y acepto los <a href="/terminos-y-condiciones/" target="_blank" class="fw-bold text-primary text-decoration-none">Términos y Condiciones</a> y las Políticas de Privacidad de Pitutea.
+                        <label class="form-check-label ms-2 small text-dark"
+                            for="{{ form.acepta_terminos.id_for_label }}">
+                            He leído y acepto los <a href="/terminos-y-condiciones/" target="_blank"
+                                class="fw-bold text-primary text-decoration-none">Términos y Condiciones</a> y las
+                            Políticas de Privacidad de Pitutea.
                         </label>
                     </div>
                     {% if form.acepta_terminos.errors %}
-                    <div class="text-danger small mt-1 ms-4"><i class="fa-solid fa-circle-exclamation"></i> {{ form.acepta_terminos.errors.0 }}</div>
+                    <div class="text-danger small mt-1 ms-4"><i class="fa-solid fa-circle-exclamation"></i> {{
+                        form.acepta_terminos.errors.0 }}</div>
                     {% endif %}
                 </div>
 
@@ -239,6 +256,11 @@
     #campos-cuidador.show {
         max-height: 1200px;
         opacity: 1;
+    }
+
+    .input-group > .form-control:first-child {
+        border-top-right-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
     }
 </style>
 
@@ -314,11 +336,10 @@
         const regionSelect = document.getElementById('id_region_select');
         const ciudadSelect = document.getElementById('id_ciudad_select');
         if (regionSelect && ciudadSelect) {
-            {% load static %}
-            fetch('{% static "assets/territoriochile.json" %}')
+            fetch('{% url "obtener_regiones_comunas" %}')
                 .then(response => response.json())
                 .then(data => {
-                    regionSelect.addEventListener('change', function() {
+                    regionSelect.addEventListener('change', function () {
                         const selectedRegionName = regionSelect.value;
                         ciudadSelect.innerHTML = '<option value="">Selecciona una ciudad...</option>';
                         if (selectedRegionName) {
@@ -342,6 +363,34 @@
                     });
                 })
                 .catch(err => console.error("Error al cargar regiones:", err));
+        }
+
+        // Toggle visibilidad de contraseña
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.querySelector('input[name="password"]');
+        const eyeIcon = document.getElementById('eyeIcon');
+        
+        if (togglePassword && passwordInput && eyeIcon) {
+            togglePassword.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                eyeIcon.classList.toggle('fa-eye');
+                eyeIcon.classList.toggle('fa-eye-slash');
+            });
+        }
+
+        // Toggle visibilidad de confirmación de contraseña
+        const togglePasswordConfirm = document.getElementById('togglePasswordConfirm');
+        const passwordConfirmInput = document.querySelector('input[name="password_confirm"]');
+        const eyeIconConfirm = document.getElementById('eyeIconConfirm');
+        
+        if (togglePasswordConfirm && passwordConfirmInput && eyeIconConfirm) {
+            togglePasswordConfirm.addEventListener('click', function() {
+                const type = passwordConfirmInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordConfirmInput.setAttribute('type', type);
+                eyeIconConfirm.classList.toggle('fa-eye');
+                eyeIconConfirm.classList.toggle('fa-eye-slash');
+            });
         }
     });
 </script>
