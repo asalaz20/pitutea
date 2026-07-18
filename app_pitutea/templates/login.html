@@ -80,6 +80,21 @@
                 <input type="hidden" name="next" value="{{ next }}">
 
                 <div class="mb-3">
+                    <label class="form-label fw-semibold small text-center d-block" style="color: #0b5ed7;">¿Cómo deseas ingresar?</label>
+                    <div class="btn-group w-100" role="group" aria-label="Rol de inicio de sesión">
+                        <input type="radio" class="btn-check" name="rol" id="rol_cuidador" value="CUIDADOR" checked autocomplete="off">
+                        <label class="btn btn-outline-primary fw-bold py-2" for="rol_cuidador" style="border-top-left-radius: 8px; border-bottom-left-radius: 8px;">
+                            <i class="fa-solid fa-hand-holding-heart me-1"></i> Cuidador/a
+                        </label>
+
+                        <input type="radio" class="btn-check" name="rol" id="rol_oferente" value="OFERENTE" autocomplete="off">
+                        <label class="btn btn-outline-primary fw-bold py-2" for="rol_oferente" style="border-top-right-radius: 8px; border-bottom-right-radius: 8px;">
+                            <i class="fa-solid fa-briefcase me-1"></i> Oferente
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mb-3">
                     <label class="form-label fw-semibold small" style="color: #0b5ed7;">RUT</label>
                     <div class="input-group">
                         <span class="input-group-text bg-light text-muted border-end-0 rounded-start-3" style="border-top-left-radius: 8px !important; border-bottom-left-radius: 8px !important;">

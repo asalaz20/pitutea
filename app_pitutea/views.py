@@ -87,19 +87,24 @@ def login_usuario(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
         
-        # Intentar buscar el nombre de usuario asociado al RUT ingresado
+        rol_seleccionado = request.POST.get('rol', 'CUIDADOR')
+        
+        # Intentar buscar el nombre de usuario asociado al RUT ingresado y rol seleccionado
         username_to_auth = username
         rut_norm = normalizar_rut(username)
         if rut_norm:
             try:
-                perfil = Perfil.objects.get(rut=rut_norm)
+                perfil = Perfil.objects.get(rut=rut_norm, rol=rol_seleccionado)
                 username_to_auth = perfil.usuario.username
-            except Perfil.DoesNotExist:
+            except (Perfil.DoesNotExist, Perfil.MultipleObjectsReturned):
                 pass
                 
         user = authenticate(request, username=username_to_auth, password=password)
         if user is not None:
-            if hasattr(user, 'perfil') and user.perfil.estado_verificacion == 'BLOQUEADO':
+            # Validar que el rol del perfil coincida con el seleccionado
+            if hasattr(user, 'perfil') and user.perfil.rol != rol_seleccionado and not user.is_staff:
+                error_message = f"Esta cuenta no está registrada como {rol_seleccionado.lower()}."
+            elif hasattr(user, 'perfil') and user.perfil.estado_verificacion == 'BLOQUEADO':
                 error_message = "Esta cuenta ha sido bloqueada por mal uso de la plataforma y se le ha denegado el acceso."
             elif not user.is_active:
                 error_message = "Esta cuenta no está activa. Por favor, verifica tu correo electrónico."

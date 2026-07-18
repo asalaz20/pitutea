@@ -71,7 +71,8 @@ class LoginUsuarioTests(TestCase):
         # Intentar iniciar sesión usando el RUT formateado (con puntos y guión)
         response = self.client.post(reverse('login'), {
             'username': '12.345.678-5',
-            'password': 'testpassword123'
+            'password': 'testpassword123',
+            'rol': 'OFERENTE'
         })
         # Debe redirigir al flujo 2FA tras validar credenciales con éxito
         self.assertEqual(response.status_code, 302)
@@ -81,7 +82,8 @@ class LoginUsuarioTests(TestCase):
         # Intentar iniciar sesión usando el RUT sin formatear
         response = self.client.post(reverse('login'), {
             'username': '123456785',
-            'password': 'testpassword123'
+            'password': 'testpassword123',
+            'rol': 'OFERENTE'
         })
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.startswith(reverse('login_2fa')))
@@ -90,7 +92,8 @@ class LoginUsuarioTests(TestCase):
         # Intentar iniciar sesión usando el nombre de usuario (como para el admin)
         response = self.client.post(reverse('login'), {
             'username': 'admin',
-            'password': 'adminpassword123'
+            'password': 'adminpassword123',
+            'rol': 'OFERENTE'
         })
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.startswith(reverse('login_2fa')))
@@ -99,12 +102,67 @@ class LoginUsuarioTests(TestCase):
         # Intentar iniciar sesión con contraseña incorrecta
         response = self.client.post(reverse('login'), {
             'username': '12.345.678-5',
-            'password': 'wrongpassword'
+            'password': 'wrongpassword',
+            'rol': 'OFERENTE'
         })
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'login.html')
         self.assertIn('error_message', response.context)
         self.assertEqual(response.context['error_message'], "Usuario o contraseña incorrectos.")
+
+    def test_login_multiple_profiles_same_rut(self):
+        # Crear un segundo usuario (cuidador) con el mismo RUT
+        cuidador_user = User.objects.create_user(
+            username='maria_perez',
+            email='maria@example.com',
+            password='cuidadorpassword123'
+        )
+        Perfil.objects.create(
+            usuario=cuidador_user,
+            rol='CUIDADOR',
+            rut='123456785',
+            telefono='+56998765432'
+        )
+
+        # 1. Iniciar sesión como CUIDADOR: debe ingresar con la cuenta de maria_perez
+        response = self.client.post(reverse('login'), {
+            'username': '12.345.678-5',
+            'password': 'cuidadorpassword123',
+            'rol': 'CUIDADOR'
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith(reverse('login_2fa')))
+
+        # 2. Iniciar sesión como OFERENTE: debe ingresar con la cuenta de juan_perez
+        response = self.client.post(reverse('login'), {
+            'username': '12.345.678-5',
+            'password': 'testpassword123',
+            'rol': 'OFERENTE'
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith(reverse('login_2fa')))
+
+        # 3. Intentar ingresar con rol OFERENTE usando la contraseña de CUIDADOR: debe fallar (credenciales incorrectas)
+        response = self.client.post(reverse('login'), {
+            'username': '12.345.678-5',
+            'password': 'cuidadorpassword123',
+            'rol': 'OFERENTE'
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['error_message'], "Usuario o contraseña incorrectos.")
+
+        # 4. Intentar ingresar con contraseña correcta pero rol incorrecto (ej: loguear a maria_perez como OFERENTE)
+        # Esto debería fallar porque maria_perez tiene rol CUIDADOR, no OFERENTE.
+        # Al buscar por rut y rol=OFERENTE, obtendrá el usuario de juan_perez, pero la contraseña no coincidirá con la de juan_perez
+        # de modo que authenticate fallará.
+        # Y si se usa username directamente:
+        response = self.client.post(reverse('login'), {
+            'username': 'maria_perez',
+            'password': 'cuidadorpassword123',
+            'rol': 'OFERENTE'
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['error_message'], "Esta cuenta no está registrada como oferente.")
 
 class PitutoFormattingTests(TestCase):
     def setUp(self):
