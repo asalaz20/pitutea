@@ -1,6 +1,35 @@
 from django import forms
 from django.contrib.auth.models import User
 from .models import Perfil, Pituto
+import json
+import os
+from django.conf import settings
+
+def load_regions():
+    json_path = os.path.join(settings.BASE_DIR, 'app_pitutea', 'static', 'assets', 'territoriochile.json')
+    try:
+        with open(json_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            return [('', 'Selecciona una región...')] + [(r['nombre'], r['nombre']) for r in data]
+    except Exception:
+        return [('', 'Selecciona una región...')]
+
+def load_comunas_for_region(region_name):
+    json_path = os.path.join(settings.BASE_DIR, 'app_pitutea', 'static', 'assets', 'territoriochile.json')
+    try:
+        with open(json_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            for r in data:
+                if r['nombre'] == region_name:
+                    comunas = []
+                    for p in r['provincias']:
+                        for c in p['comunas']:
+                            comunas.append((c['nombre'], c['nombre']))
+                    comunas.sort(key=lambda x: x[0])
+                    return comunas
+    except Exception:
+        pass
+    return []
 
 def normalizar_rut(rut_str):
     if not rut_str:
@@ -22,7 +51,20 @@ class RegistroForm(forms.ModelForm):
     apellidos = forms.CharField(max_length=150, required=False, label='Apellidos', widget=forms.TextInput(attrs={'class': 'form-control rounded-3', 'placeholder': 'Ej: Pérez Gómez'}))
     rut = forms.CharField(max_length=20, required=False, label='RUT', widget=forms.TextInput(attrs={'class': 'form-control rounded-3', 'placeholder': 'Ej: 12.345.678-9'}))
     direccion = forms.CharField(max_length=200, required=False, label='Dirección', widget=forms.TextInput(attrs={'class': 'form-control rounded-3', 'placeholder': 'Ej: Av. Principal 123 (Opcional)'}))
+    region = forms.ChoiceField(choices=[], required=False, label='Región', widget=forms.Select(attrs={'class': 'form-select rounded-3', 'id': 'id_region_select'}))
+    ciudad = forms.ChoiceField(choices=[('', 'Selecciona una ciudad...')], required=False, label='Ciudad / Comuna', widget=forms.Select(attrs={'class': 'form-select rounded-3', 'id': 'id_ciudad_select'}))
     telefono = forms.CharField(max_length=20, required=False, label='Teléfono Celular', widget=forms.TextInput(attrs={'class': 'form-control rounded-3', 'placeholder': 'Ej: +56 9 1234 5678'}))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['region'].choices = load_regions()
+        selected_region = None
+        if self.data and self.data.get('region'):
+            selected_region = self.data.get('region')
+        if selected_region:
+            self.fields['ciudad'].choices = [('', 'Selecciona una ciudad...')] + load_comunas_for_region(selected_region)
+        else:
+            self.fields['ciudad'].choices = [('', 'Selecciona una ciudad...')]
     
     # Campos adicionales para cuidadores
     habilidades = forms.CharField(required=False, label='Habilidades o Competencias', widget=forms.Textarea(attrs={'class': 'form-control rounded-3', 'rows': 3, 'placeholder': 'Cuéntanos qué sabes hacer, qué herramientas manejas...'}))
@@ -123,11 +165,15 @@ class RegistroForm(forms.ModelForm):
                 rol=rol,
                 rut=normalizar_rut(self.cleaned_data.get('rut')),
                 telefono=self.cleaned_data.get('telefono'),
-                direccion=self.cleaned_data.get('direccion')
+                direccion=self.cleaned_data.get('direccion'),
+                region=self.cleaned_data.get('region'),
+                ciudad=self.cleaned_data.get('ciudad'),
+                comuna=self.cleaned_data.get('ciudad')
             )
             if rol == 'CUIDADOR':
                 perfil.habilidades = self.cleaned_data.get('habilidades')
                 perfil.carnet_cuidador = self.cleaned_data.get('carnet_cuidador')
+                perfil.estado_verificacion = 'NO_VERIFICADO'
                 perfil.save()
         return user
 
@@ -137,34 +183,53 @@ class PerfilForm(forms.ModelForm):
 
     class Meta:
         model = Perfil
-        fields = ['rut', 'carnet_cuidador', 'telefono', 'comuna', 'categoria_interes', 'habilidades']
+        fields = ['rut', 'carnet_cuidador', 'telefono', 'direccion', 'region', 'ciudad', 'categoria_interes', 'habilidades']
         widgets = {
             'rut': forms.TextInput(attrs={'class': 'form-control rounded-3', 'placeholder': 'Ej: 12.345.678-9'}),
             'telefono': forms.TextInput(attrs={'class': 'form-control rounded-3', 'placeholder': '+56 9 1234 5678'}),
-            'comuna': forms.TextInput(attrs={'class': 'form-control rounded-3', 'placeholder': 'Ej: Providencia (Déjalo en blanco si prefieres remoto)'}),
+            'direccion': forms.TextInput(attrs={'class': 'form-control rounded-3', 'placeholder': 'Ej: Av. Principal 123'}),
+            'region': forms.Select(attrs={'class': 'form-select rounded-3', 'id': 'id_region_select'}),
+            'ciudad': forms.Select(attrs={'class': 'form-select rounded-3', 'id': 'id_ciudad_select'}),
             'categoria_interes': forms.Select(attrs={'class': 'form-select rounded-3'}),
             'habilidades': forms.Textarea(attrs={'class': 'form-control rounded-3', 'rows': 3, 'placeholder': 'Cuéntanos qué sabes hacer, qué herramientas manejas...'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['region'].widget.choices = load_regions()
+        selected_region = None
+        if self.instance and self.instance.region:
+            selected_region = self.instance.region
+        elif self.data and self.data.get('region'):
+            selected_region = self.data.get('region')
+            
+        if selected_region:
+            self.fields['ciudad'].widget.choices = [('', 'Selecciona una ciudad...')] + load_comunas_for_region(selected_region)
+        else:
+            self.fields['ciudad'].widget.choices = [('', 'Selecciona una ciudad...')]
+
+        # Cargar valores iniciales para nombres y apellidos de usuario (para ambos roles)
+        if self.instance and self.instance.usuario:
+            self.initial['nombres'] = self.instance.usuario.first_name
+            self.initial['apellidos'] = self.instance.usuario.last_name
+
         if self.instance and self.instance.rol == 'OFERENTE':
-            self.fields.pop('nombres', None)
-            self.fields.pop('apellidos', None)
+            # Ocultar campos específicos de cuidador para el oferente
             self.fields.pop('rut', None)
             self.fields.pop('carnet_cuidador', None)
+            self.fields.pop('categoria_interes', None)
+            self.fields.pop('habilidades', None)
         else:
             if self.instance and self.instance.usuario:
-                self.initial['nombres'] = self.instance.usuario.first_name
-                self.initial['apellidos'] = self.instance.usuario.last_name
                 self.initial['rut'] = self.instance.rut_formateado
                 
-            if 'nombres' in self.fields:
-                self.fields['nombres'].required = True
-            if 'apellidos' in self.fields:
-                self.fields['apellidos'].required = True
             if 'rut' in self.fields:
                 self.fields['rut'].required = True
+
+        if 'nombres' in self.fields:
+            self.fields['nombres'].required = True
+        if 'apellidos' in self.fields:
+            self.fields['apellidos'].required = True
 
     def clean_rut(self):
         rut = self.cleaned_data.get('rut')
@@ -205,10 +270,16 @@ class PerfilForm(forms.ModelForm):
 
     def save(self, commit=True):
         perfil = super().save(commit=False)
-        if perfil.rol == 'CUIDADOR':
-            perfil.usuario.first_name = self.cleaned_data.get('nombres', '')
-            perfil.usuario.last_name = self.cleaned_data.get('apellidos', '')
+        perfil.comuna = perfil.ciudad
+        
+        # Guardar nombres y apellidos para ambos roles en el modelo User
+        if perfil.usuario:
+            if 'nombres' in self.cleaned_data:
+                perfil.usuario.first_name = self.cleaned_data.get('nombres', '')
+            if 'apellidos' in self.cleaned_data:
+                perfil.usuario.last_name = self.cleaned_data.get('apellidos', '')
             perfil.usuario.save()
+            
         if commit:
             perfil.save()
         return perfil

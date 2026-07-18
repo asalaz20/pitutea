@@ -58,6 +58,40 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
     }
+
+    // Carga dinámica de regiones y comunas
+    const regionSelect = document.getElementById('id_region_select');
+    const ciudadSelect = document.getElementById('id_ciudad_select');
+    if (regionSelect && ciudadSelect) {
+        {% load static %}
+        fetch('{% static "assets/territoriochile.json" %}')
+            .then(response => response.json())
+            .then(data => {
+                regionSelect.addEventListener('change', function() {
+                    const selectedRegionName = regionSelect.value;
+                    ciudadSelect.innerHTML = '<option value="">Selecciona una ciudad...</option>';
+                    if (selectedRegionName) {
+                        const regionData = data.find(r => r.nombre === selectedRegionName);
+                        if (regionData) {
+                            let comunas = [];
+                            regionData.provincias.forEach(prov => {
+                                prov.comunas.forEach(com => {
+                                    comunas.push(com.nombre);
+                                    });
+                                });
+                            comunas.sort();
+                            comunas.forEach(comuna => {
+                                const opt = document.createElement('option');
+                                opt.value = comuna;
+                                opt.textContent = comuna;
+                                ciudadSelect.appendChild(opt);
+                            });
+                        }
+                    }
+                });
+            })
+            .catch(err => console.error("Error al cargar regiones:", err));
+    }
 });
 </script>
 {% endblock %}

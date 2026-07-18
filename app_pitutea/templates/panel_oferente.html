@@ -9,23 +9,74 @@
     <a href="{% url 'crear_pituto' %}" class="btn btn-primary fw-bold rounded-pill px-4 shadow-sm">+ Nuevo</a>
 </div>
 
+{% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags|default:'info' }} rounded-3 py-2 px-3 mb-3 small fw-semibold">
+        {% if message.tags == 'error' %}<i class="fa-solid fa-circle-exclamation me-1"></i>
+        {% elif message.tags == 'success' %}<i class="fa-solid fa-circle-check me-1"></i>
+        {% else %}<i class="fa-solid fa-circle-info me-1"></i>{% endif %}
+        {{ message }}
+    </div>
+    {% endfor %}
+{% endif %}
+
 <div class="row g-3">
     {% for pituto in pitutos %}
     <div class="col-12 col-md-6">
-        <div class="card h-100 border-0 shadow-sm rounded-4">
+        <div class="card h-100 border-0 shadow-sm rounded-4 {% if pituto.estado == 'OTORGADO' %}border-start border-4 border-warning{% elif pituto.estado == 'FINALIZADO' %}border-start border-4 border-success{% endif %}">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start mb-2">
                     <h5 class="card-title fw-bold mb-0 text-dark">{{ pituto.titulo }}</h5>
-                    <span class="badge {% if pituto.activo %}text-bg-success{% else %}text-bg-secondary{% endif %} rounded-pill">
-                        {% if pituto.activo %}Activo{% else %}Inactivo{% endif %}
-                    </span>
+                    {% if pituto.estado == 'ACTIVO' %}
+                        <span class="badge text-bg-primary rounded-pill">Activo</span>
+                    {% elif pituto.estado == 'OTORGADO' %}
+                        <span class="badge text-bg-warning text-dark rounded-pill"><i class="fa-solid fa-user-check me-1"></i>Trabajo Otorgado</span>
+                    {% elif pituto.estado == 'FINALIZADO' %}
+                        <span class="badge text-bg-success rounded-pill"><i class="fa-solid fa-flag-checkered me-1"></i>Finalizado</span>
+                    {% else %}
+                        <span class="badge text-bg-secondary rounded-pill">Inactivo</span>
+                    {% endif %}
                 </div>
-                <p class="text-muted small mb-3">Publicado el {{ pituto.fecha_creacion|date:"d M Y" }}</p>
+
+                <p class="text-muted small mb-2">Publicado el {{ pituto.fecha_creacion|date:"d M Y" }}</p>
+                <div class="mb-3 small">
+                    <strong>💰 Pago:</strong> <span class="fw-bold text-success">{{ pituto.pago_formateado }}</span> / {{ pituto.tipo_pago }}
+                </div>
+
+                {% if pituto.estado == 'OTORGADO' %}
+                <p class="small mb-2">
+                    <i class="fa-solid fa-user me-1 text-warning"></i>
+                    <strong>Cuidador:</strong>
+                    {{ pituto.cuidador_seleccionado.get_full_name|default:pituto.cuidador_seleccionado.username }}
+                </p>
+                {% endif %}
+
+                {% if pituto.estado == 'FINALIZADO' %}
+                <div class="mb-2 small">
+                    <i class="fa-solid fa-star text-warning me-1"></i>
+                    <strong>Tu calificación al cuidador:</strong>
+                    {% for i in "12345" %}{% if forloop.counter <= pituto.calificacion_a_cuidador %}⭐{% else %}☆{% endif %}{% endfor %}
+                    ({{ pituto.calificacion_a_cuidador }}/5)
+                    {% if pituto.calificacion_a_oferente %}
+                    <br><i class="fa-solid fa-star text-success me-1"></i>
+                    <strong>El cuidador te calificó:</strong>
+                    {% for i in "12345" %}{% if forloop.counter <= pituto.calificacion_a_oferente %}⭐{% else %}☆{% endif %}{% endfor %}
+                    ({{ pituto.calificacion_a_oferente }}/5)
+                    {% else %}
+                    <br><span class="text-muted fst-italic">Esperando calificación del cuidador…</span>
+                    {% endif %}
+                </div>
+                {% endif %}
+
                 <div class="d-flex flex-column gap-2">
                     <a href="{% url 'ver_postulantes' pituto.id %}" class="btn btn-outline-primary w-100 rounded-3 fw-bold">
                         Ver Postulantes ({{ pituto.postulaciones.count }})
                     </a>
-                    {% if pituto.postulaciones.count == 0 and pituto.activo %}
+                    {% if pituto.estado == 'OTORGADO' %}
+                    <a href="{% url 'finalizar_pituto' pituto.id %}" class="btn btn-success w-100 rounded-3 fw-bold">
+                        <i class="fa-solid fa-flag-checkered me-1"></i> Finalizar y Calificar
+                    </a>
+                    {% elif pituto.postulaciones.count == 0 and pituto.estado == 'ACTIVO' %}
                     <div class="d-flex gap-2">
                         <a href="{% url 'editar_pituto' pituto.id %}" class="btn btn-warning w-50 rounded-3 fw-bold text-dark">
                             <i class="fa-solid fa-pen-to-square"></i> Editar

@@ -95,6 +95,7 @@
   .text-teal{ color:var(--teal); }
   .text-ink-soft{ color:var(--ink-soft); }
   .text-donar{ color:var(--coral); }
+  .text-navy-da
 
   .navbar{
     background-color:rgba(245,249,248,0.88);
@@ -165,19 +166,20 @@
 
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
-          <a class="nav-link text-teal" href="#" data-bs-toggle="modal" data-bs-target="#modalPronto" aria-label="Ir a la Tienda de Pitutea"><i class="fa-solid fa-store"></i>&nbsp;<b>Tienda</b></a>
-        </li>
 
         <li class="nav-item dropdown">
-          <a class="nav-link text-donar dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <i class="fa-solid fa-handshake"></i>&nbsp;<b>Quienes Somos</b>
+          <a class="nav-link text-teal dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fa-solid fa-user-large"></i>&nbsp;<b>Quienes Somos</b>
           </a>
           <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-            <li><a class="dropdown-item text-teal" href="#"><i class="fa-solid fa-minus"></i>&nbsp; ¿Cómo ofrecer un Pituto?</a></li>
-            <li><a class="dropdown-item text-teal" href="#"><i class="fa-solid fa-minus"></i>&nbsp; ¿Cómo postular a un Pituto?</a></li>
-            <li><a class="dropdown-item text-teal" href="#"><i class="fa-solid fa-minus"></i>&nbsp; ¿Quienes somos?</a></li>
+            <li><a class="dropdown-item text-teal" href="#" data-bs-toggle="modal" data-bs-target="#modalAboutUs"><i class="fa-solid fa-chevron-right fa-xs"></i>&nbsp; ¿Quienes somos?</a></li>
+            <li><a class="dropdown-item text-teal" href="#" data-bs-toggle="modal" data-bs-target="#modalComoPublicar"><i class="fa-solid fa-chevron-right fa-xs"></i>&nbsp; ¿Cómo ofrecer un Pituto?</a></li>
+            <li><a class="dropdown-item text-teal" href="#" data-bs-toggle="modal" data-bs-target="#modalComoPostular"><i class="fa-solid fa-chevron-right fa-xs"></i>&nbsp; ¿Cómo postular a un Pituto?</a></li>
           </ul>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link text-donar" href="#" data-bs-toggle="modal" data-bs-target="#modalPronto" aria-label="Ir a la Tienda de Pitutea"><i class="fa-solid fa-store"></i>&nbsp;<b>Tienda</b></a>
         </li>
 
         <li class="nav-item">
@@ -205,9 +207,9 @@
   <div class="container d-flex justify-content-between align-items-center flex-wrap gap-2 small text-ink-soft">
     <span>© 2026 PituTEA · Chile</span>
     <div>
-      <a href="https://wa.me/56926041663?text=*Hola PituTEA* Quiero comunicarme con Ustedes 💙"><i class="fa-brands fa-whatsapp fa-lg"></i></a>
-      &nbsp;<a href="#"><i class="fa-brands fa-instagram fa-lg"></i></a>
-      &nbsp;<a href="#"><i class="fa-brands fa-facebook fa-lg"></i></a>
+      <a href="https://wa.me/56991421122?text=*Hola PituTEA* Quiero comunicarme con Ustedes 💙"><i class="fa-brands fa-whatsapp fa-lg"></i></a>
+      &nbsp;<a href="https://www.instagram.com/pitutea.cl" target="_blank"><i class="fa-brands fa-instagram fa-lg"></i></a>
+      &nbsp;<a href="https://www.facebook.com/share/188JEj5jud/" target="_blank"><i class="fa-brands fa-facebook fa-lg"></i></a>
       &nbsp;<a href="mailto:contactopitutea@gmail.com"><i class="fa-regular fa-envelope fa-lg"></i></a>
     </div>
   </div>
@@ -218,14 +220,14 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="modalProntoLabel"><i class="fa-solid fa-store"></i> Sitio en construcción</h5>
+        <h5 class="modal-title text-primary" id="modalProntoLabel"><i class="fa-solid fa-store"></i> Tienda en construcción</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <p>Estamos trabajando en nuestra tienda, pronto muchos productos y novedades.</p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-donar" data-bs-dismiss="modal">Cerrar</button>
       </div>
     </div>
   </div>
@@ -266,11 +268,99 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i class="fa-solid fa-xmark"></i>&nbsp; Cerrar</button>
+        <button type="button" class="btn btn-donar" data-bs-dismiss="modal"><i class="fa-solid fa-xmark"></i>&nbsp; Cerrar</button>
       </div>
     </div>
   </div>
 </div>
+
+<!--Modal Quienes Somos PituTEA-->
+<div class="modal fade" id="modalAboutUs" tabindex="-1" aria-labelledby="modalAboutUsLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title text-primary" id="modalAboutUsLabel"><i class="fa-solid fa-puzzle-piece"></i>&nbsp;PituTea</h3>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <h4 class="text-teal"><i class="fa-regular fa-handshake"></i><b>&nbsp;¿Quienes somos?</b></h4>
+        <p>PituTea es la primera plataforma en Chile que conecta Cuidadores con Pitutos flexibles de manera sencilla, segura y <b class="text-donar">100% Gratis</b>.</p>
+
+        <p>Entendemos el desafío de cuidar y al mismo tiempo querer generar ingresos. Por eso unimos a personas que necesitan ayuda puntual, con Cuidadores que buscan trabajos esporádicos, breves y adaptados a su tiempo.</p>
+
+        <h4 class="text-teal"><i class="fa-regular fa-handshake"></i><b>&nbsp;Lo que hacemos:</b></h4>
+        <ul>
+            <li>Conectar</li>
+            <li>Facilitar</li>
+            <li>Incluir</li>
+        </ul>
+
+        <p>Porque creemos que todos merecemos la oportunidad de pitutear con dignidad y flexibilidad.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-donar" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--Modal cómo publicar un pituto en PituTEA-->
+<div class="modal fade" id="modalComoPublicar" tabindex="-1" aria-labelledby="exampleComoPublicarLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalComoPublicarLabel"><i class="fa-solid fa-heart-circle-exclamation"></i>&nbsp; Cómo publicar un pituto en PituTEA</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>¿Tienes mucho que hacer en casa?¿necesitas una mano extra?, entonces usa PituTEA y conecta con personas cerca de Ti. </p>
+       <h5>1.  Regístrate</h5>
+    <p>Crea tu cuenta de forma gratuita.</p>
+    <h5>2.  Describe el pituto</h5>
+    <p>Título, descripción, comuna, modalidad, pago y tiempo estimado.</p>
+    <h5>3.  Elige al cuidador ideal</h5>
+    <p>Recibe postulaciones y contrata a quien mejor se adapte.</p>
+
+     <p>PituTea conecta tu necesidad con cuidadores que buscan flexibilidad. 
+        Pitutos breves, esporádicos y con impacto real.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-donar" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--Modal cómo Postular un pituto en PituTEA-->
+<div class="modal fade" id="modalComoPostular" tabindex="-1" aria-labelledby="exampleComoPostularLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalComoPostularLabel"><i class="fa-solid fa-heart-circle-exclamation"></i>&nbsp; Cómo postular para un pituto en PituTEA</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>En PituTEA sabemos que tu tiempo es valioso. Por eso buscar pitutos es rápido y 100% flexible. </p>
+        <h5>1.  Crea tu perfil</h5>
+        <p>Regístrate gratis y cuéntanos tus habilidades. Así las familias te encuentran más fácil.</p>
+        <h5>2.  Filtra lo que te sirve</h5>
+        <p>Busca por palabra clave, categoría, comuna, modalidad y pago. Solo te mostramos pitutos compatibles con tu tiempo.</p>
+        <h5>3.  Postula y conecta</h5>
+        <p>¿Te gustó uno? Inicia sesión y postula directo y <b class="text-donar">100% gratis</b>. Coordina con la familia o persona y empieza a "pitutear".</p>
+
+        <h5>¿Qué tipo de pitutos hay?</h5>
+        <p>Trabajos remotos de 1-2 horas · Tareas por proyecto · Apoyo esporádico · Pitutos desde tu casa</p>
+
+        <p>En PituTea los pitutos se adaptan a ti. No tú al pituto.</p>
+        <p>Porque cuidar también es trabajar.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-donar" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <!--Font Awesome Icons v6 -->
 <script src="https://kit.fontawesome.com/23804ef557.js" crossorigin="anonymous"></script>

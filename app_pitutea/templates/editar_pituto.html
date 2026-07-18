@@ -12,7 +12,19 @@
                 {% for field in form %}
                 <div class="mb-3">
                     <label class="form-label fw-semibold small text-dark">{{ field.label }}</label>
+                    {% if field.name == 'pago' %}
+                    <div class="input-group">
+                        <span class="input-group-text bg-light text-muted border-end-0 rounded-start-3" style="border-top-left-radius: 8px !important; border-bottom-left-radius: 8px !important;">
+                            💰
+                        </span>
+                        <input type="text" name="{{ field.name }}" id="{{ field.id_for_label }}" class="form-control border-start-0 border-end-0" placeholder="15.000" value="{{ field.value|default:'' }}" required style="border-radius: 0 !important;">
+                        <span class="input-group-text bg-light text-muted border-start-0 rounded-end-3" style="border-top-right-radius: 8px !important; border-bottom-right-radius: 8px !important; font-weight: bold; font-size: 0.85rem;">
+                            CLP
+                        </span>
+                    </div>
+                    {% else %}
                     {{ field }}
+                    {% endif %}
                     {% if field.errors %}<div class="text-danger small mt-1">{{ field.errors.0 }}</div>{% endif %}
                 </div>
                 {% endfor %}
@@ -22,10 +34,28 @@
                     </button>
                     <a class="btn btn-outline-primary w-50 fw-bold py-3 rounded-3 mt-2 shadow-sm" href="{% if user.is_authenticated and user.perfil.rol == 'OFERENTE' %}{% url 'panel_oferente' %}{% else %}{% url 'listar_ofertas' %}{% endif %}"><i class="fa-solid fa-arrow-rotate-left"></i> Regresar</a>
                 </div><!-- Close d-flex --> 
-                <br>
-                <br>   
             </form>
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const pagoInput = document.getElementById('id_pago');
+    if (pagoInput) {
+        if (pagoInput.value) {
+            pagoInput.value = formatearMiles(pagoInput.value);
+        }
+        pagoInput.addEventListener('input', function(e) {
+            e.target.value = formatearMiles(e.target.value);
+        });
+    }
+
+    function formatearMiles(val) {
+        let clean = val.replace(/[^0-9]/g, '');
+        if (clean.length === 0) return '';
+        return parseInt(clean, 10).toLocaleString('es-CL');
+    }
+});
+</script>
 {% endblock %}

@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% block title %}Calificar Oferente | Pitutea{% endblock %}
+
+{% block content %}
+<div class="mb-4 mt-2">
+    <a href="{% url 'bitacora_cuidador' %}" class="text-decoration-none text-muted small">← Volver a mi bitácora</a>
+    <h1 class="h4 fw-bold text-dark mt-2 mb-1">Califica al Oferente</h1>
+    <h2 class="h5 text-primary">{{ pituto.titulo }}</h2>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-12 col-md-7 col-lg-5">
+
+        <!-- Resumen del oferente -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="bg-success bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width:52px;height:52px;flex-shrink:0;">
+                    <i class="fa-solid fa-building-user fa-lg text-success"></i>
+                </div>
+                <div>
+                    <p class="mb-0 small text-muted">Publicado por</p>
+                    <h5 class="mb-0 fw-bold text-dark">
+                        {{ pituto.creador.get_full_name|default:pituto.creador.username }}
+                    </h5>
+                    <span class="small text-muted">Finalizado el {{ pituto.fecha_finalizacion|date:"d M Y" }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calificación que recibiste -->
+        {% if pituto.calificacion_a_cuidador %}
+        <div class="card border-0 shadow-sm rounded-4 mb-4 bg-warning bg-opacity-10">
+            <div class="card-body py-3 px-4">
+                <p class="mb-1 small fw-semibold text-dark"><i class="fa-solid fa-star text-warning me-1"></i> El oferente te calificó:</p>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="fs-4">
+                        {% for i in "12345" %}{% if forloop.counter <= pituto.calificacion_a_cuidador %}⭐{% else %}☆{% endif %}{% endfor %}
+                    </span>
+                    <span class="fw-bold text-dark">{{ pituto.calificacion_a_cuidador }}/5</span>
+                </div>
+                {% if pituto.comentario_a_cuidador %}
+                <p class="small text-muted mt-1 mb-0 fst-italic">"{{ pituto.comentario_a_cuidador }}"</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Formulario de calificación -->
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4">
+                <h5 class="fw-bold text-dark mb-1">Tu turno de calificar</h5>
+                <p class="text-muted small mb-4">¿Cómo fue tu experiencia con este oferente?</p>
+
+                {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-danger rounded-3 py-2 px-3 mb-3 small">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    <!-- Star Rating -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold small text-dark d-block mb-2">Calificación <span class="text-danger">*</span></label>
+                        <div class="star-rating-widget d-flex flex-row-reverse justify-content-end gap-1">
+                            {% for i in "54321" %}
+                            {% with val=forloop.revcounter %}
+                            <input type="radio" name="calificacion" id="star-o-{{ val }}" value="{{ val }}" class="visually-hidden star-input" required>
+                            <label for="star-o-{{ val }}" class="star-label" title="{{ val }} estrella{% if val > 1 %}s{% endif %}">
+                                <i class="fa-solid fa-star"></i>
+                            </label>
+                            {% endwith %}
+                            {% endfor %}
+                        </div>
+                        <p class="text-muted small mt-2 mb-0" id="star-label-text-o">Selecciona una calificación</p>
+                    </div>
+
+                    <!-- Comentario opcional -->
+                    <div class="mb-4">
+                        <label for="comentario" class="form-label fw-semibold small text-dark">Comentario (opcional)</label>
+                        <textarea name="comentario" id="comentario" rows="3" class="form-control rounded-3"
+                            placeholder="Ej: Muy buen trato, claras instrucciones..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 fw-bold rounded-3 py-3 shadow-sm"
+                        onclick="return confirm('¿Confirmas tu calificación?');">
+                        <i class="fa-solid fa-paper-plane me-2"></i> Enviar Calificación
+                    </button>
+                    <br>
+                    <br>
+                    <br>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.star-rating-widget .star-label {
+    font-size: 2.2rem;
+    color: #d1d5db;
+    cursor: pointer;
+    transition: color 0.15s ease, transform 0.1s ease;
+}
+.star-rating-widget .star-label:hover,
+.star-rating-widget .star-label:hover ~ .star-label,
+.star-rating-widget .star-input:checked ~ .star-label {
+    color: #f59e0b;
+}
+.star-rating-widget .star-label:hover { transform: scale(1.15); }
+.star-rating-widget .star-input:checked + .star-label { color: #f59e0b; }
+</style>
+
+<script>
+const starLabels = ['', 'Muy malo', 'Regular', 'Bueno', 'Muy bueno', 'Excelente'];
+document.querySelectorAll('.star-input').forEach(input => {
+    input.addEventListener('change', () => {
+        document.getElementById('star-label-text-o').textContent =
+            `${input.value} estrella${input.value > 1 ? 's' : ''} — ${starLabels[input.value]}`;
+    });
+});
+</script>
+{% endblock %}

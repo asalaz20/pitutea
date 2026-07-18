@@ -12,10 +12,11 @@ from django.utils.encoding import force_bytes, force_str
 from django.core.mail import send_mail
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib import messages
+from django.urls import reverse
 from django.conf import settings
 
 from .models import Pituto, Postulacion, Perfil
-from .forms import RegistroForm, PerfilForm, PitutoForm
+from .forms import RegistroForm, PerfilForm, PitutoForm, normalizar_rut
 
 # FASE 2: MATCHING Y PERFIL
 
@@ -35,8 +36,9 @@ def registro_usuario(request):
             # Generar token de activación seguro
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             token = default_token_generator.make_token(user)
-            domain = get_current_site(request).domain
-            verification_link = f"https://{domain}/verificar-correo/{uid}/{token}/"
+            verification_link = request.build_absolute_uri(
+                reverse('verificar_correo', kwargs={'uidb64': uid, 'token': token})
+            )
             
             # Enviar correo de activación
             subject = "Verifica tu correo electrónico - Pitutea"
@@ -85,9 +87,21 @@ def login_usuario(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
         
-        user = authenticate(request, username=username, password=password)
+        # Intentar buscar el nombre de usuario asociado al RUT ingresado
+        username_to_auth = username
+        rut_norm = normalizar_rut(username)
+        if rut_norm:
+            try:
+                perfil = Perfil.objects.get(rut=rut_norm)
+                username_to_auth = perfil.usuario.username
+            except Perfil.DoesNotExist:
+                pass
+                
+        user = authenticate(request, username=username_to_auth, password=password)
         if user is not None:
-            if not user.is_active:
+            if hasattr(user, 'perfil') and user.perfil.estado_verificacion == 'BLOQUEADO':
+                error_message = "Esta cuenta ha sido bloqueada por mal uso de la plataforma y se le ha denegado el acceso."
+            elif not user.is_active:
                 error_message = "Esta cuenta no está activa. Por favor, verifica tu correo electrónico."
             else:
                 # Generar código OTP de 6 dígitos para doble autenticación
@@ -189,8 +203,8 @@ def editar_perfil(request):
     return render(request, 'editar_perfil.html', {'form': form})
 
 def listar_ofertas(request):
-    # Base QuerySet
-    ofertas = Pituto.objects.filter(activo=True)
+    # Base QuerySet: solo pitutos activos en estado ACTIVO
+    ofertas = Pituto.objects.filter(activo=True, estado='ACTIVO')
     
     # Filtros
     q = request.GET.get('q', '')
@@ -256,9 +270,17 @@ def postular_pituto(request, oferta_id):
 def bitacora_cuidador(request):
     if request.user.perfil.rol != 'CUIDADOR':
         return redirect('listar_ofertas')
-        
-    postulaciones = Postulacion.objects.filter(usuario=request.user).order_by('-fecha_postulacion')
-    return render(request, 'bitacora_cuidador.html', {'postulaciones': postulaciones})
+
+    postulaciones = Postulacion.objects.filter(usuario=request.user).select_related('pituto').order_by('-fecha_postulacion')
+    # Pitutos donde el cuidador fue seleccionado (para mostrar calificación pendiente)
+    pitutos_asignados = Pituto.objects.filter(
+        cuidador_seleccionado=request.user
+    ).select_related('creador').order_by('-fecha_finalizacion')
+
+    return render(request, 'bitacora_cuidador.html', {
+        'postulaciones': postulaciones,
+        'pitutos_asignados': pitutos_asignados,
+    })
 
 
 
@@ -340,3 +362,95 @@ def archivar_pituto(request, pituto_id):
         messages.success(request, "Pituto archivado correctamente.")
         
     return redirect('panel_oferente')
+
+
+# --- Ciclo de vida del Pituto ---
+
+@login_required
+def seleccionar_cuidador(request, pituto_id, postulacion_id):
+    """Oferente selecciona un cuidador → Pituto pasa a estado OTORGADO."""
+    if request.user.perfil.rol != 'OFERENTE':
+        return redirect('listar_ofertas')
+    if request.method != 'POST':
+        return redirect('ver_postulantes', pituto_id=pituto_id)
+
+    pituto = get_object_or_404(Pituto, id=pituto_id, creador=request.user)
+    postulacion = get_object_or_404(Postulacion, id=postulacion_id, pituto=pituto)
+
+    if pituto.estado != 'ACTIVO':
+        messages.error(request, "Este pituto ya no está activo y no puedes cambiar el cuidador.")
+        return redirect('ver_postulantes', pituto_id=pituto_id)
+
+    pituto.cuidador_seleccionado = postulacion.usuario
+    pituto.estado = 'OTORGADO'
+    pituto.activo = False   # Ya no aparece en el listado público
+    pituto.save()
+    messages.success(
+        request,
+        f"¡Cuidador seleccionado! {postulacion.usuario.get_full_name() or postulacion.usuario.username} "
+        f"realizará el pituto '{pituto.titulo}'."
+    )
+    return redirect('panel_oferente')
+
+
+@login_required
+def finalizar_pituto(request, pituto_id):
+    """Oferente marca el pituto como finalizado y califica al cuidador."""
+    if request.user.perfil.rol != 'OFERENTE':
+        return redirect('listar_ofertas')
+
+    pituto = get_object_or_404(Pituto, id=pituto_id, creador=request.user, estado='OTORGADO')
+
+    if request.method == 'POST':
+        calificacion = request.POST.get('calificacion')
+        comentario = request.POST.get('comentario', '').strip()
+
+        if not calificacion or not calificacion.isdigit() or not (1 <= int(calificacion) <= 5):
+            messages.error(request, "Debes seleccionar una calificación entre 1 y 5 estrellas.")
+            return render(request, 'finalizar_pituto.html', {'pituto': pituto})
+
+        from django.utils import timezone
+        pituto.calificacion_a_cuidador = int(calificacion)
+        pituto.comentario_a_cuidador = comentario if comentario else None
+        pituto.estado = 'FINALIZADO'
+        pituto.fecha_finalizacion = timezone.now()
+        pituto.save()
+        messages.success(request, f"Pituto '{pituto.titulo}' finalizado. ¡Gracias por tu calificación!")
+        return redirect('panel_oferente')
+
+    return render(request, 'finalizar_pituto.html', {'pituto': pituto})
+
+
+@login_required
+def calificar_oferente(request, pituto_id):
+    """Cuidador califica al oferente tras la finalización del pituto."""
+    if request.user.perfil.rol != 'CUIDADOR':
+        return redirect('listar_ofertas')
+
+    pituto = get_object_or_404(
+        Pituto,
+        id=pituto_id,
+        cuidador_seleccionado=request.user,
+        estado='FINALIZADO'
+    )
+
+    # Solo puede calificar si aún no lo ha hecho
+    if pituto.calificacion_a_oferente is not None:
+        messages.info(request, "Ya calificaste al oferente de este pituto.")
+        return redirect('bitacora_cuidador')
+
+    if request.method == 'POST':
+        calificacion = request.POST.get('calificacion')
+        comentario = request.POST.get('comentario', '').strip()
+
+        if not calificacion or not calificacion.isdigit() or not (1 <= int(calificacion) <= 5):
+            messages.error(request, "Debes seleccionar una calificación entre 1 y 5 estrellas.")
+            return render(request, 'calificar_oferente.html', {'pituto': pituto})
+
+        pituto.calificacion_a_oferente = int(calificacion)
+        pituto.comentario_a_oferente = comentario if comentario else None
+        pituto.save()
+        messages.success(request, "¡Gracias por tu calificación! Ayuda a mejorar la comunidad Pitutea.")
+        return redirect('bitacora_cuidador')
+
+    return render(request, 'calificar_oferente.html', {'pituto': pituto})

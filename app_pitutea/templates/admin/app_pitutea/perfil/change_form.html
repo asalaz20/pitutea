@@ -1,0 +1,302 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    /* Custom Styling for Pitutea Caregiver Verification Change Form */
+    :root {
+        --primary-color: #2563eb;
+        --primary-hover: #1d4ed8;
+        --success-color: #16a34a;
+        --warning-color: #d97706;
+        --danger-color: #dc2626;
+        --gray-color: #4b5563;
+        --bg-card: #ffffff;
+        --shadow-premium: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    }
+    
+    body {
+        background-color: #f8fafc !important;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    }
+    
+    #content {
+        padding: 30px 40px !important;
+    }
+    
+    #content-main {
+        background: var(--bg-card);
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: var(--shadow-premium);
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .breadcrumbs {
+        background: transparent !important;
+        padding: 0 0 15px 0 !important;
+        font-size: 0.9em;
+        color: #64748b;
+    }
+    
+    .breadcrumbs a {
+        color: var(--primary-color) !important;
+        font-weight: 500;
+    }
+    
+    /* Section Headings */
+    .module h2 {
+        background: #f1f5f9 !important;
+        color: #1e293b !important;
+        border-radius: 6px !important;
+        padding: 12px 16px !important;
+        margin-bottom: 20px !important;
+        font-size: 1em !important;
+        font-weight: 600 !important;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border: 1px solid #e2e8f0;
+    }
+    
+    /* Form lines */
+    .form-row {
+        border-bottom: 1px solid #f1f5f9 !important;
+        padding: 16px 8px !important;
+    }
+    
+    .form-row:last-child {
+        border-bottom: none !important;
+    }
+    
+    .form-row > div {
+        display: flex;
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+    
+    .form-row label {
+        font-weight: 600 !important;
+        color: #334155 !important;
+        width: 220px !important;
+        float: none !important;
+        padding-top: 8px;
+    }
+    
+    .form-row .readonly {
+        padding: 8px 12px !important;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        color: #64748b;
+        font-size: 0.95em;
+        display: inline-block;
+        min-width: 200px;
+    }
+    
+    /* Inputs Styling */
+    .form-row input[type="text"], 
+    .form-row input[type="password"],
+    .form-row select, 
+    .form-row textarea {
+        background: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 6px !important;
+        padding: 8px 12px !important;
+        font-size: 0.95em !important;
+        color: #1e293b !important;
+        transition: all 0.2s ease;
+        width: 100%;
+        max-width: 480px;
+        box-sizing: border-box;
+    }
+    
+    .form-row input[type="text"]:focus,
+    .form-row select:focus,
+    .form-row textarea:focus {
+        border-color: var(--primary-color) !important;
+        outline: none !important;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+    }
+    
+    /* Custom Styling for Verification Status Field */
+    select#id_estado_verificacion {
+        font-weight: 600 !important;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        font-size: 0.85em !important;
+        transition: all 0.3s ease;
+    }
+    
+    select#id_estado_verificacion[data-state="VERIFICADO"] {
+        color: var(--success-color) !important;
+        border-color: #bbf7d0 !important;
+        background-color: #f0fdf4 !important;
+    }
+    
+    select#id_estado_verificacion[data-state="PENDIENTE"] {
+        color: var(--warning-color) !important;
+        border-color: #fef08a !important;
+        background-color: #fffbeb !important;
+    }
+    
+    select#id_estado_verificacion[data-state="NO_VERIFICADO"] {
+        color: var(--gray-color) !important;
+        border-color: #e2e8f0 !important;
+        background-color: #f8fafc !important;
+    }
+    
+    select#id_estado_verificacion[data-state="BLOQUEADO"] {
+        color: var(--danger-color) !important;
+        border-color: #fca5a5 !important;
+        background-color: #fef2f2 !important;
+    }
+    
+    select#id_estado_verificacion[data-state="INACTIVO"] {
+        color: #64748b !important;
+        border-color: #cbd5e1 !important;
+        background-color: #f1f5f9 !important;
+    }
+    
+    /* Custom CSS class for Verification section to draw focus */
+    .fieldset-verification {
+        background: #f8fafc;
+        border: 2px solid #e2e8f0 !important;
+        border-radius: 8px;
+        margin-top: 30px !important;
+        overflow: hidden;
+    }
+    
+    .fieldset-verification h2 {
+        background: #e2e8f0 !important;
+        border: none !important;
+        border-radius: 0 !important;
+        margin-bottom: 0 !important;
+        color: #334155 !important;
+    }
+    
+    .fieldset-verification .form-row {
+        padding: 20px 24px !important;
+        background: #ffffff;
+    }
+    
+    .fieldset-verification .form-row label {
+        color: #1e293b !important;
+    }
+    
+    /* Carnet Preview customization */
+    .carnet-preview-container {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .carnet-preview-img {
+        max-width: 100% !important;
+        height: auto !important;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .carnet-preview-img:hover {
+        transform: scale(1.015);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Action / Submit Buttons */
+    .submit-row {
+        background: #f8fafc !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 8px !important;
+        padding: 16px 24px !important;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 12px;
+        margin-top: 24px !important;
+    }
+    
+    .submit-row input[type="submit"], .submit-row a.deletelink {
+        padding: 10px 20px !important;
+        font-size: 0.9em !important;
+        font-weight: 600 !important;
+        border-radius: 6px !important;
+        height: auto !important;
+        line-height: normal !important;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    
+    .submit-row input[type="submit"].default {
+        background: var(--primary-color) !important;
+        color: #ffffff !important;
+        border: none !important;
+    }
+    
+    .submit-row input[type="submit"].default:hover {
+        background: var(--primary-hover) !important;
+        box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+    }
+    
+    .submit-row input[type="submit"]:not(.default) {
+        background: #ffffff !important;
+        color: #475569 !important;
+        border: 1px solid #e2e8f0 !important;
+    }
+    
+    .submit-row input[type="submit"]:not(.default):hover {
+        background: #f1f5f9 !important;
+    }
+    
+    .submit-row a.deletelink {
+        background: var(--danger-color) !important;
+        color: #ffffff !important;
+        display: inline-flex;
+        align-items: center;
+        text-decoration: none;
+    }
+    
+    .submit-row a.deletelink:hover {
+        background: #b91c1c !important;
+        box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.2);
+    }
+    
+    /* Errors list customization */
+    .errornote {
+        background-color: #fef2f2 !important;
+        border: 1px solid #fecaca !important;
+        color: var(--danger-color) !important;
+        border-radius: 6px !important;
+        font-weight: 600 !important;
+        padding: 12px 16px !important;
+    }
+</style>
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const estadoSelect = document.getElementById("id_estado_verificacion");
+        if (estadoSelect) {
+            const updateStateStyle = () => {
+                estadoSelect.setAttribute("data-state", estadoSelect.value);
+            };
+            updateStateStyle();
+            estadoSelect.addEventListener("change", updateStateStyle);
+        }
+        
+        // Dynamically style verification fieldset in Django admin
+        const fieldsets = document.querySelectorAll("fieldset");
+        fieldsets.forEach(fieldset => {
+            const h2 = fieldset.querySelector("h2");
+            if (h2 && h2.textContent.includes("Verificación")) {
+                fieldset.classList.add("fieldset-verification");
+            }
+        });
+    });
+</script>
+{% endblock %}

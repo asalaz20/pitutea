@@ -12,6 +12,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 SECRET_KEY = env('SECRET_KEY', default='django-insecure-*zvh9@n%#=en^sv18b@zv6tw2-e0e7)4b60p$y%rsa4$b1p*r#')
+
+#Debe queda en Defautl True para cPanel
 DEBUG = env('DEBUG', default=True)
 
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['*'])
@@ -38,6 +40,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'app_pitutea.middleware.BlockUserMiddleware',
 ]
 
 ROOT_URLCONF = 'pitutea_core.urls'
@@ -75,17 +78,36 @@ TIME_ZONE = 'America/Santiago'
 USE_I18N = True
 USE_TZ = True
 
-STATIC_URL = 'static/'
+# ─────────────────────────────────────────────────────────────
+# Sub-ruta de la aplicación (ej: /app cuando se despliega en
+# pitutea.cl/app/). En producción, configurar en .env:
+#   SCRIPT_NAME=/app
+# En desarrollo local dejar vacío o no configurar.
+# ─────────────────────────────────────────────────────────────
+SCRIPT_NAME = env('SCRIPT_NAME', default='')
+
+if SCRIPT_NAME:
+    FORCE_SCRIPT_NAME = SCRIPT_NAME
+    STATIC_URL = f'{SCRIPT_NAME}/static/'
+    MEDIA_URL  = f'{SCRIPT_NAME}/media/'
+else:
+    STATIC_URL = 'static/'
+    MEDIA_URL  = '/media/'
+
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+MEDIA_ROOT  = BASE_DIR / 'media'
 
-# Media files (uploads)
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-
-
-# En principio daba error ya que siempre dirigia por defecto de Djando a accounts/profile
+# Redirige al panel del oferente tras login
 LOGIN_REDIRECT_URL = 'panel_oferente'
 
-# Email settings for local development (prints to console)
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# Email (modo consola para desarrollo local)
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# Email SMTP para producción (reemplaza tu_contraseña_de_correo con la real)
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 DEFAULT_FROM_EMAIL = 'no-reply@pitutea.cl'
+EMAIL_HOST = 'mail.pitutea.cl'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'no-reply@pitutea.cl'
+EMAIL_HOST_PASSWORD = 'Pitutea2026NoReply'
+EMAIL_USE_TLS = True

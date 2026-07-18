@@ -115,6 +115,23 @@
                     {% endif %}
                 </div>
 
+                <div class="row g-2">
+                    <div class="col-6 mb-3">
+                        <label class="form-label fw-semibold small text-dark">Región</label>
+                        {{ form.region }}
+                        {% if form.region.errors %}
+                        <div class="text-danger small mt-1">{{ form.region.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-6 mb-3">
+                        <label class="form-label fw-semibold small text-dark">Ciudad / Comuna</label>
+                        {{ form.ciudad }}
+                        {% if form.ciudad.errors %}
+                        <div class="text-danger small mt-1">{{ form.ciudad.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
                 <div class="mb-3">
                     <label class="form-label fw-semibold small text-dark">Correo Electrónico</label>
                     {{ form.email }}
@@ -291,6 +308,40 @@
                     e.target.value = value;
                 }
             });
+        }
+
+        // Carga dinámica de regiones y comunas
+        const regionSelect = document.getElementById('id_region_select');
+        const ciudadSelect = document.getElementById('id_ciudad_select');
+        if (regionSelect && ciudadSelect) {
+            {% load static %}
+            fetch('{% static "assets/territoriochile.json" %}')
+                .then(response => response.json())
+                .then(data => {
+                    regionSelect.addEventListener('change', function() {
+                        const selectedRegionName = regionSelect.value;
+                        ciudadSelect.innerHTML = '<option value="">Selecciona una ciudad...</option>';
+                        if (selectedRegionName) {
+                            const regionData = data.find(r => r.nombre === selectedRegionName);
+                            if (regionData) {
+                                let comunas = [];
+                                regionData.provincias.forEach(prov => {
+                                    prov.comunas.forEach(com => {
+                                        comunas.push(com.nombre);
+                                    });
+                                });
+                                comunas.sort();
+                                comunas.forEach(comuna => {
+                                    const opt = document.createElement('option');
+                                    opt.value = comuna;
+                                    opt.textContent = comuna;
+                                    ciudadSelect.appendChild(opt);
+                                });
+                            }
+                        }
+                    });
+                })
+                .catch(err => console.error("Error al cargar regiones:", err));
         }
     });
 </script>

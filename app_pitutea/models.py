@@ -26,6 +26,15 @@ class Perfil(models.Model):
         ('OFERENTE', 'Oferente (Publica trabajos)'),
         ('CUIDADOR', 'Cuidador (Busca trabajos)'),
     ]
+    
+    ESTADO_VERIFICACION_CHOICES = [
+        ('NO_VERIFICADO', 'No verificado'),
+        ('PENDIENTE', 'Autorizado Pendiente Verificación'),
+        ('VERIFICADO', 'Verificado'),
+        ('BLOQUEADO', 'Bloqueado'),
+        ('INACTIVO', 'Inactivo'),
+    ]
+    
     usuario = models.OneToOneField(User, on_delete=models.CASCADE, related_name='perfil')
     rol = models.CharField(max_length=20, choices=ROL_CHOICES)
     
@@ -34,9 +43,24 @@ class Perfil(models.Model):
     direccion = models.CharField(max_length=200, blank=True, null=True, verbose_name="Dirección")
     carnet_cuidador = models.ImageField(upload_to='carnets/', blank=True, null=True, verbose_name="Carnet de Cuidador", validators=[validar_tamano_imagen])
     comuna = models.CharField(max_length=100, blank=True, null=True, verbose_name="Comuna de residencia")
+    region = models.CharField(max_length=100, blank=True, null=True, verbose_name="Región")
+    ciudad = models.CharField(max_length=100, blank=True, null=True, verbose_name="Ciudad")
     categoria_interes = models.CharField(max_length=20, choices=CATEGORIAS_CHOICES, blank=True, null=True, verbose_name="Categoría de mayor interés")
     habilidades = models.TextField(blank=True, null=True, verbose_name="Habilidades o experiencia")
     telefono = models.CharField(max_length=20, blank=True, null=True, verbose_name="Teléfono de contacto")
+    
+    # Campos de verificación manual de cuidador
+    estado_verificacion = models.CharField(
+        max_length=30,
+        choices=ESTADO_VERIFICACION_CHOICES,
+        default='NO_VERIFICADO',
+        verbose_name="Estado de Verificación"
+    )
+    observaciones_verificacion = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name="Observaciones de Verificación"
+    )
 
     @property
     def rut_formateado(self):
@@ -93,19 +117,26 @@ class Perfil(models.Model):
 
 class Pituto(models.Model):
     TIPO_PAGO_CHOICES = [
-
         ('Transferencia', 'Transferencia'),
         ('Efectivo', 'Efectivo'),
     ]
 
+    ESTADO_CHOICES = [
+        ('ACTIVO', 'Activo'),
+        ('OTORGADO', 'Trabajo Otorgado'),
+        ('FINALIZADO', 'Finalizado'),
+    ]
+
+    CALIFICACION_CHOICES = [(i, str(i)) for i in range(1, 6)]
+
     creador = models.ForeignKey(User, on_delete=models.CASCADE, related_name='pitutos_creados', verbose_name="Oferente creador")
     titulo = models.CharField(max_length=200, verbose_name="Título del Pituto")
     descripcion = models.TextField(verbose_name="Descripción detallada")
-    
-    # Nuevos campos para Matching
+
+    # Campos para Matching
     categoria = models.CharField(max_length=20, choices=CATEGORIAS_CHOICES, default='otro', verbose_name="Categoría del trabajo")
     comuna = models.CharField(max_length=100, blank=True, null=True, verbose_name="Comuna (Dejar en blanco si es Remoto)")
-    
+
     pago = models.CharField(max_length=50, verbose_name="Monto a pagar (Ej: $15.000)")
     pago_anterior = models.CharField(max_length=50, blank=True, null=True, verbose_name="Monto anterior (tachado)")
     tipo_pago = models.CharField(max_length=20, choices=TIPO_PAGO_CHOICES, default='tarea', verbose_name="Modalidad de pago")
@@ -113,13 +144,80 @@ class Pituto(models.Model):
     activo = models.BooleanField(default=True, verbose_name="¿Está activo?")
     fecha_creacion = models.DateTimeField(auto_now_add=True)
 
+    # --- Ciclo de vida del Pituto ---
+    estado = models.CharField(
+        max_length=20,
+        choices=ESTADO_CHOICES,
+        default='ACTIVO',
+        verbose_name="Estado del Pituto"
+    )
+    cuidador_seleccionado = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='pitutos_asignados',
+        verbose_name="Cuidador seleccionado"
+    )
+    fecha_finalizacion = models.DateTimeField(null=True, blank=True, verbose_name="Fecha de finalización")
+
+    # --- Calificaciones mutuas ---
+    calificacion_a_cuidador = models.IntegerField(
+        null=True, blank=True,
+        choices=CALIFICACION_CHOICES,
+        verbose_name="Calificación al cuidador (1-5)"
+    )
+    comentario_a_cuidador = models.TextField(
+        null=True, blank=True,
+        verbose_name="Comentario al cuidador"
+    )
+    calificacion_a_oferente = models.IntegerField(
+        null=True, blank=True,
+        choices=CALIFICACION_CHOICES,
+        verbose_name="Calificación al oferente (1-5)"
+    )
+    comentario_a_oferente = models.TextField(
+        null=True, blank=True,
+        verbose_name="Comentario al oferente"
+    )
+
+    @property
+    def pago_formateado(self):
+        if not self.pago:
+            return ""
+        import re
+        digitos = ''.join(re.findall(r'\d+', self.pago))
+        if not digitos:
+            return self.pago
+        try:
+            valor = int(digitos)
+            valor_formateado = f"{valor:,}".replace(",", ".")
+            return f"$ {valor_formateado} CLP"
+        except ValueError:
+            return self.pago
+
+    @property
+    def pago_anterior_formateado(self):
+        if not self.pago_anterior:
+            return None
+        import re
+        digitos = ''.join(re.findall(r'\d+', self.pago_anterior))
+        if not digitos:
+            return self.pago_anterior
+        try:
+            valor = int(digitos)
+            valor_formateado = f"{valor:,}".replace(",", ".")
+            return f"$ {valor_formateado} CLP"
+        except ValueError:
+            return self.pago_anterior
+
     def __str__(self):
-        return f"{self.titulo} - {self.pago}"
+        return f"{self.titulo} - {self.pago_formateado}"
 
     class Meta:
         verbose_name = "Pituto"
         verbose_name_plural = "Pitutos"
         ordering = ['-fecha_creacion']
+
 
 class Postulacion(models.Model):
     pituto = models.ForeignKey(Pituto, on_delete=models.CASCADE, related_name='postulaciones', verbose_name="Pituto")
