@@ -1,5 +1,3 @@
-import random
-import time
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
@@ -109,87 +107,17 @@ def login_usuario(request):
             elif not user.is_active:
                 error_message = "Esta cuenta no está activa. Por favor, verifica tu correo electrónico."
             else:
-                # Generar código OTP de 6 dígitos para doble autenticación
-                otp = f"{random.randint(100000, 999999)}"
-                expiry = time.time() + 300 # Vence en 5 minutos
-                
-                # Guardar datos en sesión
-                request.session['pre_2fa_user_id'] = user.id
-                request.session['2fa_otp'] = otp
-                request.session['2fa_expiry'] = expiry
-                request.session['next_url'] = next_url
-                if settings.DEBUG:
-                    request.session['2fa_debug_otp'] = otp
-                
-                # Enviar OTP por correo
-                subject = "Código de doble autenticación (2FA) - Pitutea"
-                message = f"Hola {user.username},\n\nTu código de verificación de inicio de sesión de un solo uso (OTP) es:\n\n{otp}\n\nEste código vencerá en 5 minutos."
-                send_mail(
-                    subject,
-                    message,
-                    'no-reply@pitutea.cl',
-                    [user.email],
-                    fail_silently=False,
-                )
-                
-                # Redirigir a verificación OTP
-                return redirect('login_2fa')
+                auth_login(request, user)
+                if next_url:
+                    return redirect(next_url)
+                if hasattr(user, 'perfil') and user.perfil.rol == 'OFERENTE':
+                    return redirect('panel_oferente')
+                else:
+                    return redirect('listar_ofertas')
         else:
             error_message = "Usuario o contraseña incorrectos."
             
     return render(request, 'login.html', {'error_message': error_message, 'next': next_url})
-
-def login_2fa(request):
-    if request.user.is_authenticated:
-        return redirect('listar_ofertas')
-        
-    user_id = request.session.get('pre_2fa_user_id')
-    otp_expected = request.session.get('2fa_otp')
-    expiry = request.session.get('2fa_expiry')
-    next_url = request.session.get('next_url', '')
-    
-    if not user_id or not otp_expected or not expiry:
-        return redirect('login')
-        
-    error_message = None
-    
-    if request.method == 'POST':
-        otp_entered = request.POST.get('otp', '').strip()
-        
-        # Verificar expiración
-        if time.time() > expiry:
-            error_message = "El código OTP ha expirado. Por favor, inicia sesión de nuevo."
-            # Limpiar datos
-            request.session.pop('pre_2fa_user_id', None)
-            request.session.pop('2fa_otp', None)
-            request.session.pop('2fa_expiry', None)
-            request.session.pop('next_url', None)
-            return render(request, 'login_2fa.html', {'error_message': error_message})
-            
-        if otp_entered == otp_expected:
-            try:
-                user = User.objects.get(pk=user_id)
-                auth_login(request, user)
-                
-                # Limpiar datos de sesión 2FA
-                request.session.pop('pre_2fa_user_id', None)
-                request.session.pop('2fa_otp', None)
-                request.session.pop('2fa_expiry', None)
-                request.session.pop('next_url', None)
-                
-                if next_url:
-                    return redirect(next_url)
-                if user.perfil.rol == 'OFERENTE':
-                    return redirect('panel_oferente')
-                else:
-                    return redirect('listar_ofertas')
-            except User.DoesNotExist:
-                return redirect('login')
-        else:
-            error_message = "Código OTP incorrecto. Inténtalo nuevamente."
-
-    debug_otp = request.session.get('2fa_debug_otp') if settings.DEBUG else None
-    return render(request, 'login_2fa.html', {'error_message': error_message, 'debug_otp': debug_otp})
 
 @login_required
 def editar_perfil(request):

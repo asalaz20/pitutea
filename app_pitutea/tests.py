@@ -74,9 +74,9 @@ class LoginUsuarioTests(TestCase):
             'password': 'testpassword123',
             'rol': 'OFERENTE'
         })
-        # Debe redirigir al flujo 2FA tras validar credenciales con éxito
+        # Debe redirigir directamente al panel del oferente tras validar credenciales con éxito
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.startswith(reverse('login_2fa')))
+        self.assertEqual(response.url, reverse('panel_oferente'))
 
     def test_login_with_rut_unformatted(self):
         # Intentar iniciar sesión usando el RUT sin formatear
@@ -86,7 +86,7 @@ class LoginUsuarioTests(TestCase):
             'rol': 'OFERENTE'
         })
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.startswith(reverse('login_2fa')))
+        self.assertEqual(response.url, reverse('panel_oferente'))
 
     def test_login_with_username_fallback(self):
         # Intentar iniciar sesión usando el nombre de usuario (como para el admin)
@@ -96,7 +96,7 @@ class LoginUsuarioTests(TestCase):
             'rol': 'OFERENTE'
         })
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.startswith(reverse('login_2fa')))
+        self.assertEqual(response.url, reverse('listar_ofertas'))
 
     def test_login_invalid_credentials(self):
         # Intentar iniciar sesión con contraseña incorrecta
@@ -131,7 +131,9 @@ class LoginUsuarioTests(TestCase):
             'rol': 'CUIDADOR'
         })
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.startswith(reverse('login_2fa')))
+        self.assertEqual(response.url, reverse('listar_ofertas'))
+
+        self.client.logout()
 
         # 2. Iniciar sesión como OFERENTE: debe ingresar con la cuenta de juan_perez
         response = self.client.post(reverse('login'), {
@@ -140,7 +142,9 @@ class LoginUsuarioTests(TestCase):
             'rol': 'OFERENTE'
         })
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.startswith(reverse('login_2fa')))
+        self.assertEqual(response.url, reverse('panel_oferente'))
+
+        self.client.logout()
 
         # 3. Intentar ingresar con rol OFERENTE usando la contraseña de CUIDADOR: debe fallar (credenciales incorrectas)
         response = self.client.post(reverse('login'), {
